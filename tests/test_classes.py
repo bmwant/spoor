@@ -27,3 +27,17 @@ def test_call_count():
 
 def test_called():
     pass
+
+
+def test_dunder_is_not_tracked():
+    s = Spoor()
+
+    @s.track
+    class TargetClass:
+        def __str__(self):
+            return "target class"
+
+    tc = TargetClass()
+    result = f"{tc}"
+
+    assert not s.called(tc.__str__)

@@ -35,3 +35,15 @@ def test_not_called():
         pass
 
     assert s.called(target) is False
+
+
+def test_lambda():
+    s = Spoor()
+
+    l = lambda: ...
+    l = s.track(l)
+
+    l()
+
+    assert s.called(l)
+    assert s.call_count(l) == 1

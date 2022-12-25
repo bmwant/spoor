@@ -30,7 +30,6 @@ class Spoor:
         def inner(*args, **kwargs):
             key = self._get_hash(inner)
             self.broker.inc(key)
-            print("This is still called", key, inner)
             return func(*args, **kwargs)
         return inner
 
@@ -47,7 +46,10 @@ class Spoor:
         return inner
 
     def _is_dunder(self, name: str) -> bool:
-        return False
+        return (
+            name.startswith("__") and
+            name.endswith("__")
+        )
 
     def _decorate_methods(self, klass):
         """
@@ -55,7 +57,7 @@ class Spoor:
         """
         for key in klass.__dict__:
             method = klass.__dict__[key]
-            if isinstance(method, types.FunctionType):
+            if isinstance(method, types.FunctionType) and not self._is_dunder(key):
                 decorated = self._decorate_method(method)
                 setattr(klass, key, decorated)
                 
@@ -70,7 +72,6 @@ class Spoor:
 
     def call_count(self, func_id):
         key = self._get_hash(func_id)
-        print("This is call_count", key, func_id)
         return self.broker.get_value(key)
 
 
