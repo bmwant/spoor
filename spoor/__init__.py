@@ -46,7 +46,7 @@ class Spoor:
         def inner(*args, **kwargs):
             if self.enabled:
                 key = self._get_hash(inner)
-                self.broker.inc(key)
+                self.storage.inc(key)
             return func(*args, **kwargs)
         return inner
 
@@ -59,7 +59,7 @@ class Spoor:
                 method = getattr(self_, method_name)
                 # TODO: check flag for per-instance tracking
                 key = self._get_hash(method)
-                self.broker.inc(key)
+                self.storage.inc(key)
             return func(*args, **kwargs)
         return inner
 
@@ -90,7 +90,7 @@ class Spoor:
 
     def call_count(self, func_id):
         key = self._get_hash(func_id)
-        return self.broker.get_value(key)
+        return self.storage.get_value(key)
 
 
 
