@@ -5,15 +5,19 @@ import datadog
 
 class Exporter(ABC):
     @abstractmethod
-    def flush(self):
+    def inc(self, key: str) -> None:
+        raise NotImplemented("Provide implementation")
+    
+    @abstractmethod
+    def flush(self) -> None:
         raise NotImplemented("Provide implementation")
 
 
 class DatadogExporter(Exporter):
     def __init__(self):
         options = {
-            'statsd_host':'127.0.0.1',
-            'statsd_port': 8125
+            "statsd_host": "127.0.0.1",
+            "statsd_port": 8125,
         }
 
         datadog.initialize(**options)

@@ -18,6 +18,8 @@ class Spoor:
         disabled: bool = False,
     ):
         self.attach = attach
+        if attach:
+            raise NotImplemented("This feature is not implemented yet")
         self.distinct_instances = distinct_instances
         self._disabled = disabled
         self.storage = storage or MemoryStorage()
