@@ -15,7 +15,7 @@ def test_get_name_function():
     assert result == "target"
 
 
-def test_same_names_for_groupped_instances():
+def test_same_name_for_groupped_instances():
     s = Spoor(distinct_instances=False)
 
     @s.track
@@ -31,17 +31,16 @@ def test_same_names_for_groupped_instances():
 
     key1 = s._get_hash(t1.target_called)
     key2 = s._get_hash(t2.target_called)
-    assert key1 == key2
 
     result1 = s.storage.get_name(key1)
     result2 = s.storage.get_name(key2)
 
+    assert key1 == key2
     assert result1 == "TargetClass.target_called"   
     assert result2 == "TargetClass.target_called"
 
 
-
-def test_get_name_distinct_instances():
+def test_different_name_distinct_instances():
     s = Spoor(distinct_instances=True)
 
     @s.track

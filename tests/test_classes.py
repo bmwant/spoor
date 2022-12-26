@@ -77,5 +77,3 @@ def test_distinct_instances():
 
     assert s.called(t1.target_called)
     assert not s.called(t2.target_called)
-
-
