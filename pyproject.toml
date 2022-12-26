@@ -9,6 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.7"
 datadog = "^0.44.0"
+varname = "^0.10.0"
 
 
 [tool.poetry.group.dev.dependencies]

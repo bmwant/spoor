@@ -55,3 +55,27 @@ def test_dunder_is_not_tracked():
     result = f"{tc}"
 
     assert not s.called(tc.__str__)
+
+
+def test_distinct_instances():
+    s = Spoor(distinct_instances=True)
+
+    @s.track
+    class TargetClass:
+        def target_called(self):
+            pass
+
+    t1 = TargetClass()
+    t2 = TargetClass()
+
+    t1.target_called()
+
+    assert hasattr(t1, "_spoor_name")
+    assert hasattr(t2, "_spoor_name")
+    assert t1._spoor_name == "t1"
+    assert t2._spoor_name == "t2"
+
+    assert s.called(t1.target_called)
+    assert not s.called(t2.target_called)
+
+
