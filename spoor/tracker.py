@@ -72,10 +72,11 @@ class Spoor:
             if self.enabled:
                 self_ = args[0]
                 method_name = inner.__name__
-                method = getattr(self_, method_name)
                 class_name = self_.__class__.__name__
                 alias = f"{class_name}.{method_name}"
+                method = getattr(self_.__class__, method_name)
                 if self.distinct_instances:
+                    method = getattr(self_, method_name)
                     instance_name  = self_._spoor_name
                     alias = f"{instance_name}.{method_name}"
 
@@ -107,6 +108,12 @@ class Spoor:
     
     def _get_hash(self, func_id):
         # TODO: add import by path
+        if not self.distinct_instances:
+            # NOTE: return same hash for different bound methods
+            if hasattr(func_id, "__self__"):
+                klass = func_id.__self__.__class__
+                method = getattr(klass, func_id.__name__)
+                return hash(method)
         return hash(func_id)
 
     def called(self, func_id) -> bool:
@@ -116,5 +123,5 @@ class Spoor:
         key = self._get_hash(func_id)
         return self.storage.get_value(key)
 
-    def topn(self, n: int = 5) -> List[(str, int)]:
+    def topn(self, n: int = 5) -> List[tuple[str, int]]:
         return self.storage.most_common(top_n=n)

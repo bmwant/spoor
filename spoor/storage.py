@@ -21,7 +21,7 @@ class Storage(ABC):
         raise NotImplemented("Provide implementation")
 
     @abstractmethod
-    def most_common(self, top_n: int = 3) -> List[(str, int)]:
+    def most_common(self, top_n: int = 3) -> List[tuple[str, int]]:
         raise NotImplemented("Provide implementation")
 
 

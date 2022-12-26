@@ -31,7 +31,7 @@ def test_same_names_for_groupped_instances():
 
     key1 = s._get_hash(t1.target_called)
     key2 = s._get_hash(t2.target_called)
-    assert key1 != key2
+    assert key1 == key2
 
     result1 = s.storage.get_name(key1)
     result2 = s.storage.get_name(key2)
