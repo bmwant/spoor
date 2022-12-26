@@ -25,7 +25,7 @@ class TopCalls(UserList):
 
 
 if __name__ == "__main__":
-    from rich import print as rprint
+    import rich
     tc = TopCalls()
-    rprint(tc)
+    rich.print(tc)
     print(tc)
