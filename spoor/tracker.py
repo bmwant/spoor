@@ -47,6 +47,10 @@ class Spoor:
         else:
             raise ValueError(f"Cannot track instance of {type(target)}")
 
+    def _export(self):
+        for e in self.exporters:
+            pass
+    
     def _decorate_function(self, func: Callable) -> Callable:
         # TODO: looks like callable is not specific enough
         # class with __call__ is also a callable
@@ -54,7 +58,9 @@ class Spoor:
         def inner(*args, **kwargs):
             if self.enabled:
                 key = self._get_hash(inner)
+                self.storage.set_name(key, inner.__name__)
                 self.storage.inc(key)
+                self._export()
             return func(*args, **kwargs)
         return inner
 
@@ -65,14 +71,17 @@ class Spoor:
                 self_ = args[0]
                 method_name = inner.__name__
                 method = getattr(self_, method_name)
-                # TODO: implement per-instance tracking
-                # alias = method_name
-                # if self.group:
                 class_name = self_.__class__.__name__
                 alias = f"{class_name}.{method_name}"
+                if self.distinct_instances:
+                    instance_name  = self_._spoor_name
+                    alias = f"{instance_name}.{method_name}"
+
+                # TODO: if groupping together let's store with a same hash too
                 key = self._get_hash(method)
-                self.storage.inc(key)
                 self.storage.set_name(key, alias)
+                self.storage.inc(key)
+                self._export()
             return func(*args, **kwargs)
         return inner
 
