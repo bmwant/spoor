@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import Counter
+from typing import List
 
 
 class Storage(ABC):
@@ -17,6 +18,10 @@ class Storage(ABC):
 
     @abstractmethod
     def inc(self, key):
+        raise NotImplemented("Provide implementation")
+
+    @abstractmethod
+    def most_common(self, top_n: int = 3) -> List[(str, int)]:
         raise NotImplemented("Provide implementation")
 
 
@@ -37,3 +42,7 @@ class MemoryStorage(Storage):
 
     def set_name(self, key, name: str):
         self._names[key] = name
+
+    def most_common(self, top_n: int = 3):
+        # TODO: add name conversion
+        return self._registry.most_common(n=top_n)

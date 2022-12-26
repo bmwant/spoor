@@ -113,3 +113,6 @@ class Spoor:
     def call_count(self, func_id):
         key = self._get_hash(func_id)
         return self.storage.get_value(key)
+
+    def topn(self, n: int = 5) -> List[(str, int)]:
+        return self.storage.most_common(top_n=n)
