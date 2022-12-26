@@ -1,19 +1,36 @@
 import types
 from functools import wraps
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 
 
 from spoor.broker import Broker, MemoryBroker
+from spoor.exporter import Exporter
 
 
 class Spoor:
     def __init__(
         self, 
         broker: Optional[Broker] = None,
+        exporters: Optional[List[Exporter]] = None,
         attach: bool = False,
+        group: bool = False,
+        disabled: bool = False,
     ):
         self.attach = attach
+        self.group = group
+        self._disabled = disabled
         self.broker = broker or MemoryBroker()
+        self.exporters = exporters or []
+    
+    @property
+    def disabled(self) -> bool:
+        return self._disabled
+
+    def enable(self):
+        self._disabled = False
+
+    def disable(self):
+        self._disabled = True
     
     def track(self, target):
         if isinstance(target, types.FunctionType):
