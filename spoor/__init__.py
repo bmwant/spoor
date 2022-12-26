@@ -2,15 +2,14 @@ import types
 from functools import wraps
 from typing import Optional, Callable, List
 
-
-from spoor.broker import Broker, MemoryBroker
+from spoor.storage import Storage, MemoryStorage
 from spoor.exporter import Exporter
 
 
 class Spoor:
     def __init__(
         self, 
-        broker: Optional[Broker] = None,
+        storage: Optional[Storage] = None,
         exporters: Optional[List[Exporter]] = None,
         attach: bool = False,
         group: bool = False,
@@ -19,12 +18,12 @@ class Spoor:
         self.attach = attach
         self.group = group
         self._disabled = disabled
-        self.broker = broker or MemoryBroker()
+        self.storage = storage or MemoryStorage()
         self.exporters = exporters or []
     
     @property
-    def disabled(self) -> bool:
-        return self._disabled
+    def enabled(self) -> bool:
+        return not self._disabled
 
     def enable(self):
         self._disabled = False
@@ -45,20 +44,22 @@ class Spoor:
         # class with __call__ is also a callable
         @wraps(func)
         def inner(*args, **kwargs):
-            key = self._get_hash(inner)
-            self.broker.inc(key)
+            if self.enabled:
+                key = self._get_hash(inner)
+                self.broker.inc(key)
             return func(*args, **kwargs)
         return inner
 
     def _decorate_method(self, func: Callable) -> Callable:
         @wraps(func)
         def inner(*args, **kwargs):
-            self_ = args[0]
-            method_name = inner.__name__
-            method = getattr(self_, method_name)
-            # TODO: check flag for per-instance tracking
-            key = self._get_hash(method)
-            self.broker.inc(key)
+            if self.enabled:
+                self_ = args[0]
+                method_name = inner.__name__
+                method = getattr(self_, method_name)
+                # TODO: check flag for per-instance tracking
+                key = self._get_hash(method)
+                self.broker.inc(key)
             return func(*args, **kwargs)
         return inner
 
