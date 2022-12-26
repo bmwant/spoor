@@ -10,4 +10,4 @@ $ pip install spoor
 * [ ] Add datadog exporter
 * [x] Add group methods by class option
 * [ ] Add tracking by import path
-* [ ] Add `most_common` method for statistics
+* [x] Add `most_common` method for statistics
