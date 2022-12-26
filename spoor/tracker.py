@@ -6,6 +6,7 @@ from varname import varname
 
 from spoor.storage import Storage, MemoryStorage
 from spoor.exporter import Exporter
+from spoor.statistics import TopCalls
 
 
 class Spoor:
@@ -80,7 +81,6 @@ class Spoor:
                     instance_name  = self_._spoor_name
                     alias = f"{instance_name}.{method_name}"
 
-                # TODO: if groupping together let's store with a same hash too
                 key = self._get_hash(method)
                 self.storage.set_name(key, alias)
                 self.storage.inc(key)
@@ -123,5 +123,6 @@ class Spoor:
         key = self._get_hash(func_id)
         return self.storage.get_value(key)
 
-    def topn(self, n: int = 5) -> List[tuple[str, int]]:
-        return self.storage.most_common(top_n=n)
+    def topn(self, n: int = 5) -> TopCalls:
+        data = self.storage.most_common(top_n=n)
+        return TopCalls(data)

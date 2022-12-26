@@ -45,7 +45,6 @@ class MemoryStorage(Storage):
 
     def most_common(self, top_n: int = 3):
         result = []
-        # TODO: add name conversion
         for key, value in self._registry.most_common(n=top_n):
             name = self.get_name(key)
             result.append((name, value))

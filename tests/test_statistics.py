@@ -1,4 +1,7 @@
+import rich
+
 from spoor import Spoor
+from spoor.statistics import TopCalls
 
 
 def test_most_common():
@@ -61,3 +64,27 @@ def test_top_n():
     assert len(result) == 3
     assert result[0] == ('TargetClass.target_thrice', 3) 
     assert result[-1] == ('TargetClass.target_once', 1) 
+
+
+def test_rich_render():
+    s = Spoor()
+
+    @s.track
+    class TargetClass:
+        def target_first(self):
+            pass
+
+        def target_second(self):
+            pass
+
+        def target_third(self):
+            pass
+
+    tc = TargetClass()
+    _ = list([tc.target_first() for _ in range(5)])
+    _ = list([tc.target_second() for _ in range(10)])
+    _ = list([tc.target_third() for _ in range(15)])
+
+    result = s.topn()
+    assert isinstance(result, TopCalls)
+    rich.print(result)
