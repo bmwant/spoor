@@ -25,11 +25,11 @@ assert s.call_count(func) == 2
 ### Configuration
 
 | Option | Type | Default |
-| `attach` | `bool` | `False` |
+|--------|------|---------|
+| attach | `bool` | `False` |
 |`distinct_instances` | `bool` | `False` |
 | `disabled` | `bool` | `False` |
 
-```
 
 ### Exporters
 
