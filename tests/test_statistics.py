@@ -66,7 +66,7 @@ def test_top_n():
     assert result[-1] == ('TargetClass.target_once', 1) 
 
 
-def test_rich_render():
+def test_rich_render(capsys):
     s = Spoor()
 
     @s.track
@@ -87,4 +87,10 @@ def test_rich_render():
 
     result = s.topn()
     assert isinstance(result, TopCalls)
+    
     rich.print(result)
+    
+    output = capsys.readouterr().out
+    assert "Name" in output
+    assert "TargetClass" in output
+    assert "15" in output
