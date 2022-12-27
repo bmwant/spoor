@@ -5,6 +5,8 @@ on:
 
 env:
   POETRY_VERSION: "1.2.1"
+  GIT_COMMITTER_NAME: "github-actions"
+  GIT_COMMITTER_EMAIL: "github-actions@github.com"
 
 jobs:
   create-release:
@@ -24,9 +26,11 @@ jobs:
       with:
         version: ${{ env.POETRY_VERSION }}
 
-    - name: Install dependencies required
+    - name: Configure dependencies
       run: |
         poetry install --only dev
+        git config --global user.name "$GIT_COMMITTER_NAME"
+        git config --global user.email "$GIT_COMMITTER_EMAIL"
 
     - name: Build package
       run: |
