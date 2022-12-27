@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import Counter
-from typing import List
+from typing import List, Tuple
 
 
 class Storage(ABC):
@@ -21,7 +21,7 @@ class Storage(ABC):
         raise NotImplemented("Provide implementation")
 
     @abstractmethod
-    def most_common(self, top_n: int = 3) -> List[tuple[str, int]]:
+    def most_common(self, top_n: int = 3) -> List[Tuple[str, int]]:
         raise NotImplemented("Provide implementation")
 
 
