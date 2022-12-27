@@ -1,5 +1,12 @@
 <!--next-version-placeholder-->
 
+## v0.3.1 (2022-12-27)
+### Fix
+* Attach artifact to github release :cool: ([`f961d39`](https://github.com/bmwant/spoor/commit/f961d3901672ee4dd0d64464acd8ebe4e5e84dc5))
+
+### Documentation
+* Update readme with extra links :telephone: ([`0ff612a`](https://github.com/bmwant/spoor/commit/0ff612a4e055ee4b6df0f523099a2fa7308151e2))
+
 ## v0.3.0 (2022-12-27)
 ### Feature
 * Flush all data to exporters on garbage collections :mailbox_with_mail: ([`75cd2dc`](https://github.com/bmwant/spoor/commit/75cd2dc58e2cba6a14595ce3b89b067bef20bc2d))
