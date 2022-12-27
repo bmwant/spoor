@@ -1,5 +1,7 @@
+import operator
 import types
 from functools import wraps
+from collections import deque
 from typing import Optional, Callable, List
 
 from varname import varname
@@ -52,7 +54,16 @@ class Spoor:
 
     def _export(self):
         for e in self.exporters:
-            pass
+            e.send()
+
+    def __del__(self):
+        """
+        Flush all the exporters
+        """
+        deque(
+            map(operator.methodcaller("flush"), self.exporters), 
+            maxlen=0,
+        )
     
     def _decorate_function(self, func: Callable) -> Callable:
         # TODO: looks like callable is not specific enough

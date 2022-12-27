@@ -73,3 +73,13 @@ print(tc._name)
 tc2 = TargetClass("another one")
 print(tc2.name)
 print(tc2._name)
+
+
+from spoor import Spoor, DatadogExporter
+
+s = Spoor(
+    exporters=[DatadogExporter()],
+)
+
+
+del s
