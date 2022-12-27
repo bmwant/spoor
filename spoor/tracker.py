@@ -52,9 +52,9 @@ class Spoor:
         else:
             raise ValueError(f"Cannot track instance of {type(target)}")
 
-    def _export(self):
+    def _export(self, key: str):
         for e in self.exporters:
-            e.send()
+            e.send(key=key)
 
     def __del__(self):
         """
@@ -72,9 +72,10 @@ class Spoor:
         def inner(*args, **kwargs):
             if self.enabled:
                 key = self._get_hash(inner)
+                alias = inner.__name__
                 self.storage.set_name(key, inner.__name__)
                 self.storage.inc(key)
-                self._export()
+                self._export(alias)
             return func(*args, **kwargs)
         return inner
 
@@ -95,7 +96,7 @@ class Spoor:
                 key = self._get_hash(method)
                 self.storage.set_name(key, alias)
                 self.storage.inc(key)
-                self._export()
+                self._export(alias)
             return func(*args, **kwargs)
         return inner
 
