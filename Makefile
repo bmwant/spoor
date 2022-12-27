@@ -15,3 +15,7 @@ publish:
 .PHONY: coverage
 coverage:
 	@poetry run pytest --cov=hapless tests
+
+.PHONY: install
+install:
+	@poetry install --with dev --all-extras

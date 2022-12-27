@@ -1,0 +1,47 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+      - release
+  pull_request:
+    branches:
+      - main
+      - release
+
+jobs:
+  test:
+    name: "Unittests"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: |
+          make install
+
+      # - name: Check codestyle / formatting
+      #   run: |
+      #     echo "Checking imports order"
+      #     poetry run isort . --check-only
+      #     echo "Checking black codestyle"
+      #     poetry run black . --check
+
+      - name: Run unittests
+        run: |
+          make tests
