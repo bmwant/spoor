@@ -1,0 +1,24 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create a new release
+    runs-on: ubuntu-latest
+    concurrency: create-release
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      # NOTE: this is required for the python semantic release to work
+      with:
+        fetch-depth: 0
+
+    - name: Python semantic release
+      uses: relekang/python-semantic-release@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # repository_username: ${{ secrets.PYPI_USERNAME }}
+        # repository_password: ${{ secrets.PYPI_TOKEN }}
