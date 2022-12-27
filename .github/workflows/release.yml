@@ -3,6 +3,9 @@ name: Create release
 on:
   workflow_dispatch:
 
+env:
+  POETRY_VERSION: "1.2.1"
+
 jobs:
   create-release:
     name: Create a new release
@@ -16,9 +19,23 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: ${{ env.POETRY_VERSION }}
+
+    - name: Build package
+      run: |
+        make dist
+
     - name: Python semantic release
       uses: relekang/python-semantic-release@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         # repository_username: ${{ secrets.PYPI_USERNAME }}
         # repository_password: ${{ secrets.PYPI_TOKEN }}
+
+    - name: Upload package to PyPI
+      run: |
+        # make publish
+        echo "Publishing with Poetry"
