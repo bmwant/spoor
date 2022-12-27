@@ -34,17 +34,8 @@ jobs:
 
     - name: Build package
       run: |
-<<<<<<< Updated upstream
-        poetry run semantic-release version
-        make dist
-
-    - name: Finish release procedure
-      run: |
-        poetry run semantic-release publish --retry
-=======
         poetry run semantic-release publish \
           -D commit_author="$GIT_COMMITTER_NAME <$GIT_COMMITTER_EMAIL>" \
->>>>>>> Stashed changes
 
     # - name: Python semantic release
     #   uses: relekang/python-semantic-release@master
