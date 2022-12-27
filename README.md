@@ -11,6 +11,8 @@
 [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
 
+Track invocation of your functions and methods; display collected statistics for the invocations; export data gathered to external services.
+
 ```bash
 $ pip install spoor
 ```
@@ -35,11 +37,11 @@ assert s.call_count(func) == 2
 
 ### Configuration
 
-| Option | Type | Default |
-|--------|------|---------|
-| attach | `bool` | `False` |
-|`distinct_instances` | `bool` | `False` |
-| `disabled` | `bool` | `False` |
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| attach | `bool` | `False` | tbd. |
+|`distinct_instances` | `bool` | `False` | tbd |
+| **disabled** | `bool` | `False` | tbd. |
 
 
 ### Exporters
@@ -47,10 +49,8 @@ assert s.call_count(func) == 2
 * [statsd]()
 * [DataDog]()
 
-### TODO:
+### See also
 
-* [x] Add datadog exporter
-* [x] Add group methods by class option
-* [ ] Add tracking by import path
-* [x] Add `most_common` method for statistics
-* [ ] Add mkdocs / readthedocs with examples
+* 🍒 [podmena](https://github.com/bmwant/podmena) for nice commits emoji
+* 🌈 [rich](https://github.com/Textualize/rich) for beautiful terminal output
+* 🇺🇦 [United 24](https://u24.gov.ua/) to support Ukraine in the war
