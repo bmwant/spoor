@@ -24,14 +24,23 @@ jobs:
       with:
         version: ${{ env.POETRY_VERSION }}
 
-    # - name: Build package
-    #   run: |
-    #     make dist
+    - name: Install dependencies required
+      run: |
+        poetry install --only dev
 
-    - name: Python semantic release
-      uses: relekang/python-semantic-release@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build package
+      run: |
+        poetry run semantic-release version
+        make dist
+
+    - name: Finish release procedure
+      run: |
+        poetry run semantic-release publish --retry
+
+    # - name: Python semantic release
+    #   uses: relekang/python-semantic-release@master
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
         # repository_username: ${{ secrets.PYPI_USERNAME }}
         # repository_password: ${{ secrets.PYPI_TOKEN }}
 
