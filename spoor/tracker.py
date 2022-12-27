@@ -1,14 +1,14 @@
 import operator
 import types
-from functools import wraps
 from collections import deque
-from typing import Optional, Callable, List
+from functools import wraps
+from typing import Callable, List, Optional
 
 from varname import varname
 
-from spoor.storage import Storage, MemoryStorage
 from spoor.exporter import Exporter
 from spoor.statistics import TopCalls
+from spoor.storage import MemoryStorage, Storage
 
 
 class Spoor:

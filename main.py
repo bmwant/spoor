@@ -48,6 +48,7 @@
 
 from varname import varname
 
+
 class TargetClass:
     def __init__(self, name):
         self.name = name
@@ -75,7 +76,7 @@ print(tc2.name)
 print(tc2._name)
 
 
-from spoor import Spoor, DatadogExporter
+from spoor import DatadogExporter, Spoor
 
 s = Spoor(
     exporters=[DatadogExporter()],
