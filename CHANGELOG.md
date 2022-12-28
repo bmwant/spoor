@@ -1,5 +1,9 @@
 <!--next-version-placeholder-->
 
+## v0.4.0 (2022-12-28)
+### Feature
+* Exporter sends same metric with tags attached :baby_bottle: ([`8fdc5db`](https://github.com/bmwant/spoor/commit/8fdc5dbb1f7b90d9c66142c4650f7c53217778c6))
+
 ## v0.3.4 (2022-12-28)
 ### Fix
 * Do not remove dist directory on publish :frog: ([`1ba92d0`](https://github.com/bmwant/spoor/commit/1ba92d05ff3dfff7fef612ccd5de11d35500f47c))
