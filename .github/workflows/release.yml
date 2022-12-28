@@ -32,19 +32,16 @@ jobs:
         git config --global user.name "$GIT_COMMITTER_NAME"
         git config --global user.email "$GIT_COMMITTER_EMAIL"
 
-    - name: Build package
+    - name: Publish release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         poetry run semantic-release publish \
           -D commit_author="$GIT_COMMITTER_NAME <$GIT_COMMITTER_EMAIL>" \
 
-    # - name: Python semantic release
-    #   uses: relekang/python-semantic-release@master
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-        # repository_username: ${{ secrets.PYPI_USERNAME }}
-        # repository_password: ${{ secrets.PYPI_TOKEN }}
-
     - name: Upload package to PyPI
+      env:
+        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
-        # make publish
-        echo "Publishing with Poetry"
+        poetry config pypi-token.pypi ${PYPI_TOKEN}
+        poetry publish
