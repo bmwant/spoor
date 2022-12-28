@@ -44,4 +44,6 @@ jobs:
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
         poetry config pypi-token.pypi ${PYPI_TOKEN}
+        # remove_dist should be false
+        # otherwise use --build flag
         poetry publish

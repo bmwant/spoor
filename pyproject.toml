@@ -26,6 +26,7 @@ upload_to_repository = false
 dist_path = "dist/"
 upload_to_release = true  # do not upload distribution to GH releases
 build_command = "poetry build"
+remove_dist = false
 major_on_zero = false
 tag_commit = true
 commit_subject = "Release {version}"
