@@ -1,5 +1,9 @@
 <!--next-version-placeholder-->
 
+## v0.3.3 (2022-12-28)
+### Fix
+* Upload package to PyPI on release creation :monkey_face: ([`f0f4dde`](https://github.com/bmwant/spoor/commit/f0f4dde2cb8b0f00322950097fbcf0c768cb86a5))
+
 ## v0.3.1 (2022-12-27)
 ### Fix
 * Attach artifact to github release :cool: ([`f961d39`](https://github.com/bmwant/spoor/commit/f961d3901672ee4dd0d64464acd8ebe4e5e84dc5))
