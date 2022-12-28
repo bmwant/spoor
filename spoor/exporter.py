@@ -6,12 +6,12 @@ import datadog
 
 class Exporter(ABC):
     @abstractmethod
-    def send(self, key: str, value: Any) -> None:
-        raise NotImplemented("Provide implementation")
+    def send(self, key: str, **extras) -> None:
+        raise NotImplementedError("Provide implementation")
 
     @abstractmethod
     def flush(self) -> None:
-        raise NotImplemented("Provide implementation")
+        raise NotImplementedError("Provide implementation")
 
 
 class StatsdExporter(Exporter):
@@ -29,20 +29,24 @@ class DatadogExporter(Exporter):
         self,
         *,
         options: Optional[Dict[str, Any]] = None,
-        tags: Optional[List[str]] = None,
-        prefix: Optional[str] = None,
+        metric: Optional[str] = None,
+        group: bool = True,
+        extra_tags: Optional[List[str]] = None,
     ):
         self.options = options or self._DEFAULT_OPTIONS
-        self.tags = tags or []
-        self.prefix = prefix
+        self.metric = metric
+        self.group = group
+        self.tags = extra_tags or []
         datadog.initialize(**self.options)
         self.statsd = datadog.statsd
 
-    def send(self, key, value):
-        if self.prefix is not None:
-            key = f"{self.prefix}.{key}"
-        self.statsd.increment(key, tags=self.tags)
+    def send(self, key, **extras):
+        metric = self.metric
+        if not self.group:
+            # NOTE: send each method as a separate metirc
+            metric = f"{self.metric}.{key}"
+        tags = [f"method:{key}", *self.tags]
+        self.statsd.increment(metric=metric, tags=tags)
 
     def flush(self):
-        print("Flushing when deleting")
         self.statsd.flush()

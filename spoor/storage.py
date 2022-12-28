@@ -6,23 +6,23 @@ from typing import List, Tuple
 class Storage(ABC):
     @abstractmethod
     def get_value(self):
-        raise NotImplemented("Provide implementation")
+        raise NotImplementedError("Provide implementation")
 
     @abstractmethod
     def get_name(self, key):
-        raise NotImplemented("Provide implementation")
+        raise NotImplementedError("Provide implementation")
 
     @abstractmethod
     def set_name(self, key, name):
-        raise NotImplemented("Provide implementation")
+        raise NotImplementedError("Provide implementation")
 
     @abstractmethod
     def inc(self, key):
-        raise NotImplemented("Provide implementation")
+        raise NotImplementedError("Provide implementation")
 
     @abstractmethod
     def most_common(self, top_n: int = 3) -> List[Tuple[str, int]]:
-        raise NotImplemented("Provide implementation")
+        raise NotImplementedError("Provide implementation")
 
 
 class MemoryStorage(Storage):
