@@ -39,9 +39,9 @@ assert s.call_count(func) == 2
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| attach | `bool` | `False` | tbd. |
-|`distinct_instances` | `bool` | `False` | tbd |
-| **disabled** | `bool` | `False` | tbd. |
+| `attach` | `bool` | `False` | Expose `called`/`call_count` attributes directly on a function/method object. |
+|`distinct_instances` | `bool` | `False` | Separate metrics collection for each instance of a class. Has no effect if tracking only functions. |
+| `disabled` | `bool` | `False` | Initialize as inactive and ignore metrics collection until enabled explicitly. Can be controlled via `enable()`/`disable()` methods later. |
 
 
 ### Exporters
