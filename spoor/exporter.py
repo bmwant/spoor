@@ -8,7 +8,7 @@ class Exporter(ABC):
     @abstractmethod
     def send(self, key: str, value: Any) -> None:
         raise NotImplemented("Provide implementation")
-    
+
     @abstractmethod
     def flush(self) -> None:
         raise NotImplemented("Provide implementation")

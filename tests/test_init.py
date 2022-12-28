@@ -9,7 +9,6 @@ def test_reenable():
     pass
 
 
-
 def test_get_hash_is_same_for_groupped_instances():
     s = Spoor(distinct_instances=False)
 

@@ -13,7 +13,7 @@ from spoor.storage import MemoryStorage, Storage
 
 class Spoor:
     def __init__(
-        self, 
+        self,
         storage: Optional[Storage] = None,
         exporters: Optional[List[Exporter]] = None,
         attach: bool = False,
@@ -27,7 +27,7 @@ class Spoor:
         self._disabled = disabled
         self.storage = storage or MemoryStorage()
         self.exporters = exporters or []
-    
+
     @property
     def enabled(self) -> bool:
         return not self._disabled
@@ -37,16 +37,18 @@ class Spoor:
 
     def disable(self):
         self._disabled = True
-    
+
     def track(self, target):
         if isinstance(target, types.FunctionType):
             return self._decorate_function(target)
         elif isinstance(target, type):
             if self.distinct_instances:
+
                 def new(cls, *args, **kwargs):
                     instance = object.__new__(cls)
                     instance._spoor_name = varname()
                     return instance
+
                 setattr(target, "__new__", new)
             return self._decorate_methods(target)
         else:
@@ -61,10 +63,10 @@ class Spoor:
         Flush all the exporters
         """
         deque(
-            map(operator.methodcaller("flush"), self.exporters), 
+            map(operator.methodcaller("flush"), self.exporters),
             maxlen=0,
         )
-    
+
     def _decorate_function(self, func: Callable) -> Callable:
         # TODO: looks like callable is not specific enough
         # class with __call__ is also a callable
@@ -77,6 +79,7 @@ class Spoor:
                 self.storage.inc(key)
                 self._export(alias)
             return func(*args, **kwargs)
+
         return inner
 
     def _decorate_method(self, func: Callable) -> Callable:
@@ -90,7 +93,7 @@ class Spoor:
                 method = getattr(self_.__class__, method_name)
                 if self.distinct_instances:
                     method = getattr(self_, method_name)
-                    instance_name  = self_._spoor_name
+                    instance_name = self_._spoor_name
                     alias = f"{instance_name}.{method_name}"
 
                 key = self._get_hash(method)
@@ -98,13 +101,11 @@ class Spoor:
                 self.storage.inc(key)
                 self._export(alias)
             return func(*args, **kwargs)
+
         return inner
 
     def _is_dunder(self, name: str) -> bool:
-        return (
-            name.startswith("__") and
-            name.endswith("__")
-        )
+        return name.startswith("__") and name.endswith("__")
 
     def _decorate_methods(self, klass):
         """
@@ -115,9 +116,9 @@ class Spoor:
             if isinstance(method, types.FunctionType) and not self._is_dunder(key):
                 decorated = self._decorate_method(method)
                 setattr(klass, key, decorated)
-                
+
         return klass
-    
+
     def _get_hash(self, func_id):
         # TODO: add import by path
         if not self.distinct_instances:

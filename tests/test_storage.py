@@ -36,7 +36,7 @@ def test_same_name_for_groupped_instances():
     result2 = s.storage.get_name(key2)
 
     assert key1 == key2
-    assert result1 == "TargetClass.target_called"   
+    assert result1 == "TargetClass.target_called"
     assert result2 == "TargetClass.target_called"
 
 

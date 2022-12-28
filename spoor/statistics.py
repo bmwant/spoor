@@ -6,8 +6,8 @@ from rich.table import Table
 
 class TopCalls(UserList):
     def __rich_console__(
-        self, 
-        console: Console, 
+        self,
+        console: Console,
         options: ConsoleOptions,
     ) -> RenderResult:
         # TODO: add hash column?
@@ -16,9 +16,9 @@ class TopCalls(UserList):
         for index, entry in enumerate(self.data, start=1):
             call_count = entry[1]
             table.add_row(
-                f"{index}", 
-                f"[bold magenta]{entry[0]}[/]", 
-                "[green]yes[/]" if call_count else "[yellow]no[/]", 
+                f"{index}",
+                f"[bold magenta]{entry[0]}[/]",
+                "[green]yes[/]" if call_count else "[yellow]no[/]",
                 f"{call_count}",
             )
         yield table
@@ -26,6 +26,7 @@ class TopCalls(UserList):
 
 if __name__ == "__main__":
     import rich
+
     tc = TopCalls()
     rich.print(tc)
     print(tc)

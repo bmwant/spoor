@@ -31,7 +31,7 @@ def test_most_common():
     tc.target_thrice()
 
     result = s.storage.most_common()
-    assert result[0] == ('TargetClass.target_thrice', 3)
+    assert result[0] == ("TargetClass.target_thrice", 3)
 
 
 def test_top_n():
@@ -62,8 +62,8 @@ def test_top_n():
     result = s.topn(n=3)
 
     assert len(result) == 3
-    assert result[0] == ('TargetClass.target_thrice', 3) 
-    assert result[-1] == ('TargetClass.target_once', 1) 
+    assert result[0] == ("TargetClass.target_thrice", 3)
+    assert result[-1] == ("TargetClass.target_once", 1)
 
 
 def test_rich_render(capsys):
@@ -87,9 +87,9 @@ def test_rich_render(capsys):
 
     result = s.topn()
     assert isinstance(result, TopCalls)
-    
+
     rich.print(result)
-    
+
     output = capsys.readouterr().out
     assert "Name" in output
     assert "TargetClass" in output

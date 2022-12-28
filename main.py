@@ -34,7 +34,7 @@
 #         with control.lock:
 #             control.x += 1
 #         return func(*args, **kwargs)
-    
+
 #     return inner
 
 # control.x = 0
@@ -63,6 +63,7 @@ def new(cls, *args, **kwargs):
     instance = object.__new__(cls)
     instance._name = varname()
     return instance
+
 
 setattr(TargetClass, "__new__", new)
 
