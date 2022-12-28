@@ -1,5 +1,12 @@
 <!--next-version-placeholder-->
 
+## v0.3.4 (2022-12-28)
+### Fix
+* Do not remove dist directory on publish :frog: ([`1ba92d0`](https://github.com/bmwant/spoor/commit/1ba92d05ff3dfff7fef612ccd5de11d35500f47c))
+
+### Documentation
+* Update readme with config options :vs: ([`dc2de3e`](https://github.com/bmwant/spoor/commit/dc2de3eac207f6c1c6e88dfe1ffb308a9929990c))
+
 ## v0.3.3 (2022-12-28)
 ### Fix
 * Upload package to PyPI on release creation :monkey_face: ([`f0f4dde`](https://github.com/bmwant/spoor/commit/f0f4dde2cb8b0f00322950097fbcf0c768cb86a5))

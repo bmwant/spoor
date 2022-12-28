@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "spoor"
-version = "0.3.3"
+version = "0.3.4"
 description = "Track functions invocations"
 authors = ["Misha Behersky <bmwant@gmail.com>"]
 license = "MIT"
