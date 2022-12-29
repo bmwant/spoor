@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 import datadog
+import statsd
 
 
 class Exporter(ABC):
@@ -15,7 +16,25 @@ class Exporter(ABC):
 
 
 class StatsdExporter(Exporter):
-    pass
+    def __init__(
+        self,
+        *,
+        metric: Optional[str] = None,
+        options,
+    ):
+        # TODO: use default options if not provided
+        self.metric = metric
+        self.statsd = statsd.StatsClient(
+            host=options["statsd_host"],
+            port=options["statsd_port"],
+            prefix=self.metric,
+        )
+
+    def send(self, key, **extras):
+        self.statsd.incr(key)
+
+    def flush(self):
+        self.statsd.close()
 
 
 class DatadogExporter(Exporter):
