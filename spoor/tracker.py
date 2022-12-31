@@ -9,6 +9,7 @@ from varname import varname
 from spoor.exporter import Exporter
 from spoor.statistics import TopCalls
 from spoor.storage import MemoryStorage, Storage
+from spoor.utils import logger
 
 
 class Spoor:
@@ -22,7 +23,7 @@ class Spoor:
     ):
         self.attach = attach
         if attach:
-            raise NotImplemented("This feature is not implemented yet")
+            raise NotImplementedError("This feature is not implemented yet")
         self.distinct_instances = distinct_instances
         self._disabled = disabled
         self.storage = storage or MemoryStorage()
@@ -62,6 +63,7 @@ class Spoor:
         """
         Flush all the exporters
         """
+        logger.debug("Flusing all the exporters and garbage collection")
         deque(
             map(operator.methodcaller("flush"), self.exporters),
             maxlen=0,
