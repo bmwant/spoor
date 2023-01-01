@@ -22,8 +22,6 @@ class Spoor:
         disabled: bool = False,
     ):
         self.attach = attach
-        # if attach:
-        # raise NotImplementedError("This feature is not implemented yet")
         self.distinct_instances = distinct_instances
         self._disabled = disabled
         self.storage = storage or MemoryStorage()
@@ -43,6 +41,9 @@ class Spoor:
         if isinstance(target, types.FunctionType):
             return self._decorate_function(target)
         elif isinstance(target, type):
+            if self.attach:
+                raise NotImplementedError("Attach for methods does not work yet")
+
             if self.distinct_instances:
 
                 def new(cls, *args, **kwargs):
@@ -53,6 +54,7 @@ class Spoor:
                 setattr(target, "__new__", new)
             return self._decorate_methods(target)
         else:
+            # TODO: add track by import path
             raise ValueError(f"Cannot track instance of {type(target)}")
 
     def _export(self, key: str):
@@ -111,9 +113,6 @@ class Spoor:
                     spoor._export(alias)
                 return instance.func(*args, **kwargs)
 
-        # if self.attach:
-        #     setattr(wrapper.__class__, "called", property(self.called))
-        #     setattr(wrapper.__class__, "call_count", property(self.call_count))
         inner = wraps(func)(CallableWrapper(func))
         if self.attach:
             setattr(inner.__class__, "called", property(self.called))
@@ -159,7 +158,6 @@ class Spoor:
         return klass
 
     def _get_hash(self, func_id):
-        # TODO: add import by path
         if not self.distinct_instances:
             # NOTE: return same hash for different bound methods
             if hasattr(func_id, "__self__"):
