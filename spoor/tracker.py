@@ -1,7 +1,7 @@
 import operator
 import types
 from collections import deque
-from functools import wraps
+from functools import partial, wraps
 from typing import Callable, List, Optional
 
 from varname import varname
@@ -22,8 +22,8 @@ class Spoor:
         disabled: bool = False,
     ):
         self.attach = attach
-        if attach:
-            raise NotImplementedError("This feature is not implemented yet")
+        # if attach:
+        # raise NotImplementedError("This feature is not implemented yet")
         self.distinct_instances = distinct_instances
         self._disabled = disabled
         self.storage = storage or MemoryStorage()
@@ -69,7 +69,7 @@ class Spoor:
             maxlen=0,
         )
 
-    def _decorate_function(self, func: Callable) -> Callable:
+    def _decorate_function_func(self, func: Callable) -> Callable:
         # TODO: looks like callable is not specific enough
         # class with __call__ is also a callable
         @wraps(func)
@@ -82,6 +82,39 @@ class Spoor:
                 self._export(alias)
             return func(*args, **kwargs)
 
+        inner.called = property(partial(self.called, inner))
+        return inner
+
+    def _decorate_function(self, func: Callable) -> Callable:
+        """
+        NOTE: We cannot attach a property on a function object,
+        so class-based callable wrapper is used instead
+        """
+
+        class Inner:
+            def __init__(inner, func):
+                inner.func = func
+
+            def __call__(inner, *args, **kwargs):
+                if self.enabled:
+                    key = self._get_hash(inner)
+                    alias = inner.__name__
+                    logger.debug(f"Tracking {alias}[{key}]")
+                    self.storage.set_name(key, inner.__name__)
+                    self.storage.inc(key)
+                    self._export(alias)
+                return inner.func(*args, **kwargs)
+
+            @property
+            def called(inner):
+                return self.called(inner)
+
+            @property
+            def call_count(inner):
+                return self.call_count(inner)
+
+        inner = wraps(func)(Inner(func))
+        # setattr(Inner, "called", property(partial(self.called)))
         return inner
 
     def _decorate_method(self, func: Callable) -> Callable:
