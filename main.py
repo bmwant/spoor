@@ -22,6 +22,24 @@
 # print(control.x)
 
 
+def wrap_with_inner(self):
+    class Inner:
+        def __init__(inner, func):
+            inner.func = func
+
+        def __call__(inner, *args, **kwargs):
+            if self.enabled:
+                key = self._get_hash(inner)
+                alias = inner.__name__
+                # logger.debug(f"Tracking {alias}[{key}]")
+                self.storage.set_name(key, inner.__name__)
+                self.storage.inc(key)
+                self._export(alias)
+            return inner.func(*args, **kwargs)
+
+    setattr(Inner, "called", property(partial(self.called)))
+
+
 def check_varname():
     from varname import varname
 

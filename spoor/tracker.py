@@ -90,31 +90,35 @@ class Spoor:
         NOTE: We cannot attach a property on a function object,
         so class-based callable wrapper is used instead
         """
+        spoor = self
 
-        class Inner:
-            def __init__(inner, func):
-                inner.func = func
+        class CallableWrapper:
+            """
+            NOTE: should be nested class to be able expose properties on some
+            wrapped objects and hide on others
+            """
 
-            def __call__(inner, *args, **kwargs):
-                if self.enabled:
-                    key = self._get_hash(inner)
-                    alias = inner.__name__
+            def __init__(instance, func: Callable):
+                instance.func = func
+
+            def __call__(instance, *args, **kwargs):
+                if spoor.enabled:
+                    key = spoor._get_hash(instance)
+                    alias = instance.__name__
                     logger.debug(f"Tracking {alias}[{key}]")
-                    self.storage.set_name(key, inner.__name__)
-                    self.storage.inc(key)
-                    self._export(alias)
-                return inner.func(*args, **kwargs)
+                    spoor.storage.set_name(key, alias)
+                    spoor.storage.inc(key)
+                    spoor._export(alias)
+                return instance.func(*args, **kwargs)
 
-            @property
-            def called(inner):
-                return self.called(inner)
+        # if self.attach:
+        #     setattr(wrapper.__class__, "called", property(self.called))
+        #     setattr(wrapper.__class__, "call_count", property(self.call_count))
+        inner = wraps(func)(CallableWrapper(func))
+        if self.attach:
+            setattr(inner.__class__, "called", property(self.called))
+            setattr(inner.__class__, "call_count", property(self.call_count))
 
-            @property
-            def call_count(inner):
-                return self.call_count(inner)
-
-        inner = wraps(func)(Inner(func))
-        # setattr(Inner, "called", property(partial(self.called)))
         return inner
 
     def _decorate_method(self, func: Callable) -> Callable:
@@ -167,9 +171,11 @@ class Spoor:
     def called(self, func_id) -> bool:
         return self.call_count(func_id) != 0
 
-    def call_count(self, func_id):
+    def call_count(self, func_id) -> int:
         key = self._get_hash(func_id)
-        return self.storage.get_value(key)
+        count = self.storage.get_value(key)
+        logger.debug(f"Calls count {func_id}[{key}] = {count}")
+        return count
 
     def topn(self, n: int = 5) -> TopCalls:
         data = self.storage.most_common(top_n=n)
