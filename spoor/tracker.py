@@ -101,7 +101,7 @@ class Spoor:
             """
 
             def __init__(instance, func: Callable):
-                instance.func = func
+                instance._func = func
 
             def __call__(instance, *args, **kwargs):
                 if spoor.enabled:
@@ -111,7 +111,7 @@ class Spoor:
                     spoor.storage.set_name(key, alias)
                     spoor.storage.inc(key)
                     spoor._export(alias)
-                return instance.func(*args, **kwargs)
+                return instance._func(*args, **kwargs)
 
         inner = wraps(func)(CallableWrapper(func))
         if self.attach:
