@@ -183,5 +183,29 @@ def bound_method():
     t.method1()  # (<__main__.Test object at 0x7f94d8c3aad0>,) {}
 
 
+def not_allowed():
+    import typing
+
+    class MyFunc:
+        def __init__(self, func: typing.Callable):
+            self.f = func
+
+        def __call__(self, *args, **kwargs):
+            return self.f(*args, **kwargs)
+
+    def prop(self):
+        print(f"I am a property of {self}")
+
+    @MyFunc
+    def my_func():
+        print("Just a function call")
+
+    setattr(my_func.__class__, "prop", property(prop))
+    my_func.prop
+
+    setattr(prop.__class__, "prop", "value")
+
+
 if __name__ == "__main__":
-    bound_method()
+    not_allowed()
+    # bound_method()
