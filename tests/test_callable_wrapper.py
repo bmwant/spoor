@@ -76,3 +76,13 @@ def test_both_attach_options():
     assert hasattr(decorated_false, "__wrapped__")
     assert not hasattr(decorated_false, "called")
     assert not hasattr(decorated_false, "call_count")
+
+
+def test_decoration_class_differs():
+    s = Spoor()
+    class_first = s._get_func_wrapper_cls()
+    class_second = s._get_func_wrapper_cls()
+
+    assert class_first is not class_second
+    breakpoint()
+    print()
