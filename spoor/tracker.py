@@ -87,7 +87,7 @@ class Spoor:
         inner.called = property(partial(self.called, inner))
         return inner
 
-    def _decorate_function(self, func: Callable) -> Callable:
+    def _get_func_wrapper_cls(self):
         """
         NOTE: We cannot attach a property on a function object,
         so class-based callable wrapper is used instead
@@ -113,7 +113,11 @@ class Spoor:
                     spoor._export(alias)
                 return instance._func(*args, **kwargs)
 
-        inner = wraps(func)(CallableWrapper(func))
+        return CallableWrapper
+
+    def _decorate_function(self, func: Callable) -> Callable:
+        WrapperClass = self._get_func_wrapper_cls()
+        inner = wraps(func)(WrapperClass(func))
         if self.attach:
             setattr(inner.__class__, "called", property(self.called))
             setattr(inner.__class__, "call_count", property(self.call_count))

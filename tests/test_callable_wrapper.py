@@ -54,3 +54,25 @@ def test_decorate_function_not_attached():
     assert isinstance(decorated, Callable)
 
     assert type(decorated) != type(target)
+
+
+def test_both_attach_options():
+    s_true = Spoor(attach=True)
+    s_false = Spoor(attach=False)
+
+    def target_true():
+        pass
+
+    def target_false():
+        pass
+
+    decorated_true = s_true._decorate_function(target_true)
+    decorated_false = s_false._decorate_function(target_false)
+
+    assert hasattr(decorated_true, "called")
+    assert hasattr(decorated_true, "call_count")
+    assert hasattr(decorated_true, "__wrapped__")
+
+    assert hasattr(decorated_false, "__wrapped__")
+    assert not hasattr(decorated_false, "called")
+    assert not hasattr(decorated_false, "call_count")
