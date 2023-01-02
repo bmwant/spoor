@@ -52,7 +52,7 @@ def test_dunder_is_not_tracked():
             return "target class"
 
     tc = TargetClass()
-    result = f"{tc}"
+    result = f"{tc}"  # noqa: F841
 
     assert not s.called(tc.__str__)
 
@@ -75,5 +75,9 @@ def test_distinct_instances():
     assert t1._spoor_name == "t1"
     assert t2._spoor_name == "t2"
 
+    hash1 = s._get_hash(t1.target_called)
+    hash2 = s._get_hash(t2.target_called)
+
+    assert hash1 != hash2
     assert s.called(t1.target_called)
     assert not s.called(t2.target_called)

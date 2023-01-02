@@ -76,91 +76,112 @@ def check_varname():
     del s
 
 
-from functools import partial, wraps
+def descriptor():
+    from functools import partial, wraps
+
+    class TargetClass:
+        def one(self):
+            print("one")
+
+        @property
+        def two(self):
+            print("two")
+
+    def three(self):
+        print("three")
+
+    class DS:
+        def __get__(self, obj, objtype=None):
+            return "three"
+
+    tc = TargetClass()
+    _three = partial(three, tc)
+    tc.three = DS()
+    # v = property(tc.three)
+    tc.one()
+    tc.two
+    print("type two is", type(getattr(tc, "two")))
+    # print("v is", v, type(v))
+    # breakpoint()
+    tc.three
+
+    def gta(obj, name):
+        print("I am called")
+        return obj.__getattribute__(name)
+
+    def original():
+        print("I am untoched")
+
+    print(original.__getattribute__)
+
+    def fun():
+        print("This is not fun")
+
+    fun.__getattribute__ = gta
+    fun.prop = DS()
+    setattr(fun, "prop", DS)
+    # breakpoint()
+    print(fun.prop)
+
+    class Inner:
+        def __init__(self, func):
+            self.func = func
+
+        def __call__(self, *args, **kwargs):
+            return self.func(*args, **kwargs)
+
+        @property
+        def prop(self):
+            return "three"
+
+    def decor(func):
+        i = wraps(func)(Inner(func))
+        print(i.__wrapped__)
+        return i
+
+    def prop():
+        print("I am a property")
+
+    def my_func():
+        print("Just a function call")
+
+    my_func.prop = prop
+    my_func.prop  # prints 'I am a property'
+
+    my_func.__dict__["prop"] = property(lambda: "the prop")
+    print(my_func.prop)
 
 
-class TargetClass:
-    def one(self):
-        print("one")
+def bound_method():
+    def method(*args, **kwargs):
+        print("CAlling me %r %r" % (args, kwargs))
 
-    @property
-    def two(self):
-        print("two")
+    class CallableWrapper(object):
+        # the bound method remembers the instance and the function
+        def __init__(self, instance, function):
+            self.instance = instance
+            self.function = function
 
+        # when the bound method is called, it passes the instance
+        def __call__(self, *args, **kwargs):
+            return self.function(self.instance, *args, **kwargs)
 
-def three(self):
-    print("three")
+        # def __get__(self, instance, cls):
+        #     return CallableWrapper(instance, self.function)
 
+    class Method(object):
+        # the __get__ method assembles a bound method consisting of the
+        # instance it was called from and the function
+        def __get__(self, instance, cls):
+            return CallableWrapper(instance, method)
 
-class DS:
-    def __get__(self, obj, objtype=None):
-        return "three"
+    class Test(object):
+        pass
 
-
-tc = TargetClass()
-_three = partial(three, tc)
-tc.three = DS()
-# v = property(tc.three)
-tc.one()
-tc.two
-print("type two is", type(getattr(tc, "two")))
-# print("v is", v, type(v))
-# breakpoint()
-tc.three
-
-
-def gta(obj, name):
-    print("I am called")
-    return obj.__getattribute__(name)
+    t = Test()
+    Test.method1 = Method()
+    t.method1()  # (<__main__.Test object at 0x7f94d8c3aad0>,) {}
 
 
-def original():
-    print("I am untoched")
-
-
-print(original.__getattribute__)
-
-
-def fun():
-    print("This is not fun")
-
-
-fun.__getattribute__ = gta
-fun.prop = DS()
-setattr(fun, "prop", DS)
-# breakpoint()
-print(fun.prop)
-
-
-class Inner:
-    def __init__(self, func):
-        self.func = func
-
-    def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
-
-    @property
-    def prop(self):
-        return "three"
-
-
-def decor(func):
-    i = wraps(func)(Inner(func))
-    print(i.__wrapped__)
-    return i
-
-
-def prop():
-    print("I am a property")
-
-
-def my_func():
-    print("Just a function call")
-
-
-my_func.prop = prop
-my_func.prop  # prints 'I am a property'
-
-
-my_func.__dict__["prop"] = property(lambda: "the prop")
-print(my_func.prop)
+if __name__ == "__main__":
+    bound_method()

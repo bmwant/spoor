@@ -84,5 +84,7 @@ def test_decoration_class_differs():
     class_second = s._get_func_wrapper_cls()
 
     assert class_first is not class_second
-    breakpoint()
-    print()
+    assert class_first.__name__ == class_second.__name__
+
+    assert isinstance(class_first, type)
+    assert isinstance(class_second, type)
