@@ -16,14 +16,18 @@ class FuncCall:
         console: Console,
         options: ConsoleOptions,
     ):
+        # TODO: add hash column?
+        # TODO: add id column?
         color = "yellow"
         calls = ""
         if self.called:
             color = "green"
             calls = f" ({self.call_count} calls)"
 
-        options.highlight = False
+        highlight = options.highlight
+        console._highlight = False
         yield f"[{color}]• {self.name}[/]{calls}"
+        console._highlight = highlight
 
 
 class TopCalls(UserList):
