@@ -2,11 +2,39 @@ from spoor import Spoor
 
 
 def test_disabled():
-    pass
+    s = Spoor(disabled=True)
+
+    @s.track
+    def target():
+        pass
+
+    target()
+
+    assert not s.called(target)
+    assert s.call_count(target) == 0
 
 
 def test_reenable():
-    pass
+    s = Spoor(disabled=False)
+
+    @s.track
+    def target():
+        pass
+
+    target()
+
+    assert s.called(target)
+    assert s.call_count(target) == 1
+
+    s.disable()
+    call_target = lambda: [target() for _ in range(5)]  # noqa: E731
+
+    call_target()
+    assert s.call_count(target) == 1
+
+    s.enable()
+    call_target()
+    assert s.call_count(target) == 6
 
 
 def test_get_hash_is_same_for_groupped_instances():
