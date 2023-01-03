@@ -1,5 +1,26 @@
 <!--next-version-placeholder-->
 
+## v0.5.0 (2023-01-03)
+### Feature
+* Add helper method to check whether function is tracked :droplet: ([`759cb93`](https://github.com/bmwant/spoor/commit/759cb931bedafa327b372bf289d1a901a76910b0))
+* Add flag to allow tracking dunder methods :clock6: ([`fb5d4c2`](https://github.com/bmwant/spoor/commit/fb5d4c21530de955bc6460e66d1216fb11f00c43))
+* Add rich protocol to func call dataclass :information_source: ([`e4b374d`](https://github.com/bmwant/spoor/commit/e4b374d16e0f2c4125344adf32cafafd06a44842))
+* Allow to access function call via dictionary syntax :kissing_cat: ([`40ccf3e`](https://github.com/bmwant/spoor/commit/40ccf3ebecd68c1ece40b4c0a79a1e3864e3eca7))
+* Decorate both functions and methods with a same class :city_sunrise: ([`36418c3`](https://github.com/bmwant/spoor/commit/36418c3f02c006f33e0293f86a901d546096b936))
+* Activate attach feature for functions tracking :kr: ([`b1618b2`](https://github.com/bmwant/spoor/commit/b1618b25da2ad9aa7231e11ed277c3373b313157))
+* Implement attach for functions tracking :curly_loop: ([`167ead1`](https://github.com/bmwant/spoor/commit/167ead1d13bc1148164428bdd1757e5700666a56))
+* Add logging to the package :mag: ([`7956678`](https://github.com/bmwant/spoor/commit/7956678bd0b7706b29ddb72ed4de5cb64e69b089))
+* Add statsd exporter implementation :mobile_phone_off: ([`495d548`](https://github.com/bmwant/spoor/commit/495d548e064b1c0a5a5f99e2b27f722e4b060312))
+
+### Fix
+* Control highlight for func call rich objects :koko: ([`dbe1be0`](https://github.com/bmwant/spoor/commit/dbe1be09045d335e4d21cc87ebdfadd84fd8877d))
+* Make func a private attribute :rice_scene: ([`581c3cb`](https://github.com/bmwant/spoor/commit/581c3cbf1aafb78bdce026eef1958da4f3bbee52))
+
+### Documentation
+* Testing examples :rage3: ([`3b50cdf`](https://github.com/bmwant/spoor/commit/3b50cdf58473794b97369bf2d46a982210c226bb))
+* Add example to track class :moyai: ([`a061a09`](https://github.com/bmwant/spoor/commit/a061a09a00b3eed04a793da13b38e57f56fd3f6a))
+* Add example to track functions :pouch: ([`9445fee`](https://github.com/bmwant/spoor/commit/9445feefa9fd1961b17e9d48836eabbb0b2dcbc5))
+
 ## v0.4.0 (2022-12-28)
 ### Feature
 * Exporter sends same metric with tags attached :baby_bottle: ([`8fdc5db`](https://github.com/bmwant/spoor/commit/8fdc5dbb1f7b90d9c66142c4650f7c53217778c6))
