@@ -19,10 +19,12 @@ class Spoor:
         exporters: Optional[List[Exporter]] = None,
         attach: bool = False,
         distinct_instances: bool = False,
+        skip_dunder: bool = True,
         disabled: bool = False,
     ):
         self.attach = attach
         self.distinct_instances = distinct_instances
+        self.skip_dunder = skip_dunder
         self._disabled = disabled
         self.storage = storage or MemoryStorage()
         self.exporters = exporters or []
@@ -197,7 +199,8 @@ class Spoor:
         """
         for key in klass.__dict__:
             method = klass.__dict__[key]
-            if isinstance(method, types.FunctionType) and not self._is_dunder(key):
+            skip_method = self.skip_dunder and self._is_dunder(key)
+            if isinstance(method, types.FunctionType) and not skip_method:
                 # decorated = self._decorate_method(method)
                 logger.debug(f"Wrapping method {method}")
                 decorated = self._decorate_function(method, is_method=True)

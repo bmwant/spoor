@@ -41,6 +41,7 @@ assert s.call_count(func) == 2
 |--------|------|---------|-------------|
 | `attach` | `bool` | `False` | Expose `called`/`call_count` attributes directly on a function/method object. |
 |`distinct_instances` | `bool` | `False` | Separate metrics collection for each instance of a class. Has no effect if tracking only functions. |
+|`skip_dunder` | `bool` | `True` | Do not track double underscore method calls (like `__str__`) for class instances. Has no effect if tracking only functions. |
 | `disabled` | `bool` | `False` | Initialize as inactive and ignore metrics collection until enabled explicitly. Can be controlled via `enable()`/`disable()` methods later. |
 
 
