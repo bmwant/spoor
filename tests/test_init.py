@@ -130,3 +130,49 @@ def test_hash_stays_same_for_decorated_instances():
     new_hash = s._get_hash(t2.target)
 
     assert hash == new_hash
+
+
+def test_is_tracked():
+    s = Spoor()
+
+    @s.track
+    def target():
+        pass
+
+    @s.track
+    class TargetClass:
+        def target_first(self):
+            pass
+
+        def target_second(self):
+            pass
+
+    tc = TargetClass()
+
+    assert s._is_tracked(target)
+    assert s._is_tracked(TargetClass.target_first)
+    assert s._is_tracked(TargetClass.target_second)
+    assert s._is_tracked(tc.target_second)
+    assert s._is_tracked(tc.target_second)
+
+
+def test_is_not_tracked():
+    s = Spoor()
+
+    def target():
+        pass
+
+    class TargetClass:
+        def target_first(self):
+            pass
+
+        def target_second(self):
+            pass
+
+    tc = TargetClass()
+
+    assert not s._is_tracked(target)
+    assert not s._is_tracked(TargetClass.target_first)
+    assert not s._is_tracked(TargetClass.target_second)
+    assert not s._is_tracked(tc.target_second)
+    assert not s._is_tracked(tc.target_second)

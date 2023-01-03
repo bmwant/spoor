@@ -1,7 +1,9 @@
 import operator
 import types
+import typing
+from abc import ABC
 from collections import deque
-from functools import partial, wraps
+from functools import wraps
 from typing import Callable, List, Optional, Union
 
 from varname import varname
@@ -10,6 +12,14 @@ from spoor.exporter import Exporter
 from spoor.statistics import FuncCall, TopCalls
 from spoor.storage import MemoryStorage, Storage
 from spoor.utils import logger
+
+
+class CallableWrapper(ABC):
+    pass
+
+
+# NOTE: at runtime, isinstance(x, T) will raise TypeError
+WrapperType = typing.TypeVar("WrapperType", bound=CallableWrapper)
 
 
 class Spoor:
@@ -86,30 +96,14 @@ class Spoor:
             maxlen=0,
         )
 
-    def _decorate_function_func(self, func: Callable) -> Callable:
-        # TODO: looks like callable is not specific enough
-        # class with __call__ is also a callable
-        @wraps(func)
-        def inner(*args, **kwargs):
-            if self.enabled:
-                key = self._get_hash(inner)
-                alias = inner.__name__
-                self.storage.set_name(key, inner.__name__)
-                self.storage.inc(key)
-                self._export(alias)
-            return func(*args, **kwargs)
-
-        inner.called = property(partial(self.called, inner))
-        return inner
-
-    def _get_func_wrapper_cls(self, is_method: bool = False):
+    def _get_func_wrapper_cls(self, is_method: bool = False) -> WrapperType:
         """
         NOTE: We cannot attach a property on a function object,
         so class-based callable wrapper is used instead
         """
         spoor = self
 
-        class CallableWrapper:
+        class Wrapper(CallableWrapper):
             """
             NOTE: should be nested class to be able expose properties on some
             wrapped objects and hide on others
@@ -131,7 +125,6 @@ class Spoor:
                         alias = f"{class_name}.{method_name}"
                         method = getattr(self_.__class__, method_name)
                         if spoor.distinct_instances:
-                            # breakpoint()
                             method = getattr(self_, method_name)
                             instance_name = self_._spoor_name
                             alias = f"{instance_name}.{method_name}"
@@ -140,6 +133,7 @@ class Spoor:
                         alias = instance.__name__
                         key = spoor._get_hash(instance)
                     logger.debug(f"Tracking {alias}[{key}]")
+                    # TODO: set name on initial register step
                     spoor.storage.set_name(key, alias)
                     spoor.storage.inc(key)
                     spoor._export(alias)
@@ -157,7 +151,7 @@ class Spoor:
                     return hash(self._bound_instance)
                 return hash(self._func)
 
-        return CallableWrapper
+        return Wrapper
 
     def _decorate_function(self, func: Callable, is_method: bool = False) -> Callable:
         WrapperClass = self._get_func_wrapper_cls(is_method=is_method)
@@ -168,30 +162,13 @@ class Spoor:
 
         return inner
 
-    def _decorate_method(self, func: Callable) -> Callable:
-        @wraps(func)
-        def inner(*args, **kwargs):
-            if self.enabled:
-                self_ = args[0]
-                method_name = inner.__name__
-                class_name = self_.__class__.__name__
-                alias = f"{class_name}.{method_name}"
-                method = getattr(self_.__class__, method_name)
-                if self.distinct_instances:
-                    method = getattr(self_, method_name)
-                    instance_name = self_._spoor_name
-                    alias = f"{instance_name}.{method_name}"
-
-                key = self._get_hash(method)
-                self.storage.set_name(key, alias)
-                self.storage.inc(key)
-                self._export(alias)
-            return func(*args, **kwargs)
-
-        return inner
-
     def _is_dunder(self, name: str) -> bool:
         return name.startswith("__") and name.endswith("__")
+
+    def _is_tracked(self, func_id) -> bool:
+        return isinstance(func_id, CallableWrapper) and issubclass(
+            func_id.__class__, CallableWrapper
+        )
 
     def _decorate_methods(self, klass):
         """
@@ -201,7 +178,6 @@ class Spoor:
             method = klass.__dict__[key]
             skip_method = self.skip_dunder and self._is_dunder(key)
             if isinstance(method, types.FunctionType) and not skip_method:
-                # decorated = self._decorate_method(method)
                 logger.debug(f"Wrapping method {method}")
                 decorated = self._decorate_function(method, is_method=True)
                 setattr(klass, key, decorated)
