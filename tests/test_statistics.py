@@ -145,3 +145,20 @@ def test_get_item_missing_not_strict():
     assert result.name == ""
     assert result.called is False
     assert result.call_count == 0
+
+
+def test_func_call_render_called(capsys):
+    fc = FuncCall(name="function", called=True, call_count=5)
+    rich.print(fc)
+
+    output = capsys.readouterr().out
+    assert "function" in output
+    assert "5 calls" in output
+
+
+def test_func_call_render_not_called(capsys):
+    fc = FuncCall(name="function")
+    rich.print(fc)
+
+    output = capsys.readouterr().out
+    assert output == "• function\n"

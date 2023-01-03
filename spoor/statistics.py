@@ -11,6 +11,20 @@ class FuncCall:
     called: bool = False
     call_count: int = 0
 
+    def __rich_console__(
+        self,
+        console: Console,
+        options: ConsoleOptions,
+    ):
+        color = "yellow"
+        calls = ""
+        if self.called:
+            color = "green"
+            calls = f" ({self.call_count} calls)"
+
+        options.highlight = False
+        yield f"[{color}]• {self.name}[/]{calls}"
+
 
 class TopCalls(UserList):
     def __rich_console__(
@@ -35,6 +49,6 @@ class TopCalls(UserList):
 if __name__ == "__main__":
     import rich
 
-    tc = TopCalls()
-    rich.print(tc)
-    print(tc)
+    fc = FuncCall()
+    rich.print(fc)
+    print(fc)
