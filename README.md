@@ -25,7 +25,7 @@ from spoor import Spoor
 s = Spoor()
 
 @s.track
-def function(a: int, b: int):
+def func(a: int, b: int) -> int:
   return a + b
 
 func(5, 10)

@@ -33,7 +33,7 @@ build_command = "poetry build"
 remove_dist = false
 major_on_zero = false
 tag_commit = true
-commit_subject = "Release {version}"
+commit_subject = "release: {version} :package:"
 changelog_file = "CHANGELOG.md"
 changelog_scope = false
 
