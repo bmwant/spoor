@@ -2,12 +2,12 @@ import operator
 import types
 from collections import deque
 from functools import partial, wraps
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
 from varname import varname
 
 from spoor.exporter import Exporter
-from spoor.statistics import TopCalls
+from spoor.statistics import FuncCall, TopCalls
 from spoor.storage import MemoryStorage, Storage
 from spoor.utils import logger
 
@@ -60,6 +60,19 @@ class Spoor:
     def _export(self, key: str):
         for e in self.exporters:
             e.send(key=key)
+
+    def __getitem__(self, func_id: Union[Callable, str]) -> FuncCall:
+        key = self._get_hash(func_id)
+        try:
+            call_count = self.storage.get_value(key)
+            func_call = FuncCall(
+                name=self.storage.get_name(key),
+                called=bool(call_count),
+                call_count=call_count,
+            )
+            return func_call
+        except KeyError:
+            raise KeyError(f"{func_id.__name__} is not tracked")
 
     def __del__(self):
         """

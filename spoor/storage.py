@@ -26,19 +26,24 @@ class Storage(ABC):
 
 
 class MemoryStorage(Storage):
-    def __init__(self):
+    def __init__(self, strict: bool = False):
         # TODO: add lock for thread safety
         self._registry = Counter()
         self._names = {}
+        self.strict = strict
 
     def get_value(self, key):
+        if self.strict and key not in self._registry:
+            raise KeyError(f"{key} not found")
         return self._registry[key]
 
     def inc(self, key):
         self._registry[key] += 1
 
     def get_name(self, key) -> str:
-        return self._names[key]
+        if self.strict and key not in self._names:
+            raise KeyError(f"{key} not found")
+        return self._names.get(key, "")
 
     def set_name(self, key, name: str):
         self._names[key] = name

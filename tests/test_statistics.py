@@ -1,7 +1,8 @@
+import pytest
 import rich
 
 from spoor import Spoor
-from spoor.statistics import TopCalls
+from spoor.statistics import FuncCall, TopCalls
 
 
 def test_most_common():
@@ -94,3 +95,53 @@ def test_rich_render(capsys):
     assert "Name" in output
     assert "TargetClass" in output
     assert "15" in output
+
+
+def test_get_item():
+    s = Spoor()
+
+    @s.track
+    def target():
+        pass
+
+    target()
+    func_call = s[target]
+
+    assert isinstance(func_call, FuncCall)
+    assert func_call.called is True
+    assert func_call.call_count == 1
+    assert func_call.name == "target"
+
+
+@pytest.mark.skip(reason="strict is not implemented yet")
+def test_get_item_missing_strict():
+    s = Spoor()
+
+    @s.track
+    def target():
+        pass
+
+    def missing():
+        pass
+
+    with pytest.raises(KeyError):
+        s[missing]
+
+
+def test_get_item_missing_not_strict():
+    s = Spoor()
+
+    @s.track
+    def target():
+        pass
+
+    def missing():
+        pass
+
+    result = s[missing]
+
+    assert isinstance(result, FuncCall)
+    # NOTE: just default values
+    assert result.name == ""
+    assert result.called is False
+    assert result.call_count == 0

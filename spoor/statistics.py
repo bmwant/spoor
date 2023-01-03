@@ -1,7 +1,15 @@
 from collections import UserList
+from dataclasses import dataclass
 
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.table import Table
+
+
+@dataclass
+class FuncCall:
+    name: str
+    called: bool = False
+    call_count: int = 0
 
 
 class TopCalls(UserList):
