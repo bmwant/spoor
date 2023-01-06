@@ -3,8 +3,8 @@ import types
 import typing
 from abc import ABC
 from collections import deque
-from functools import wraps
-from typing import Callable, List, Optional, Union
+from functools import update_wrapper
+from typing import Callable, List, Optional
 
 from varname import varname
 
@@ -74,8 +74,8 @@ class Spoor:
             key = target.__name__
             e.send(key=key)
 
-    def __getitem__(self, func_id: Union[Callable, str]) -> FuncCall:
-        key = self._get_hash(func_id)
+    def __getitem__(self, func_id: CallableWrapper) -> FuncCall:
+        key = hash(func_id)
         try:
             call_count = self.storage.get_value(key)
             func_call = FuncCall(
@@ -110,12 +110,10 @@ class Spoor:
             wrapped objects and hide on others
             """
 
-            def __init__(instance, func: Callable):
-                instance._func = func
-                instance._bound_instance = None
-
-            def _bound(self, instance):
+            def __init__(self, func: Callable, instance=None):
+                self._func = func
                 self._bound_instance = instance
+                update_wrapper(self, func)
 
             def __call__(instance, *args, **kwargs):
                 self_ = instance._bound_instance
@@ -163,12 +161,14 @@ class Spoor:
             def __str__(self) -> str:
                 return f"(S) {self.name}[{self.__hash__()}]"
 
-            # def __get__(self, instance, cls):
-            #     # TODO: Nope, this should return new instance
-            #     # breakpoint()
-            #     # n = wraps(self._func)(Wrapper(self._func))
-            #     self._bound(instance)
-            #     return self
+            def __get__(self, instance, cls):
+                """
+                Handle method binding
+                """
+                if is_method:
+                    # NOTE: return bound method
+                    return Wrapper(self._func, instance=instance)
+                return self
 
             def __hash__(self):
                 # TODO: test distinct enabled for function only
@@ -177,27 +177,11 @@ class Spoor:
                     return hash(self._bound_instance)
                 return hash(self._func)
 
-            def __eq__(self, other):
-                print("I am called")
-                # breakpoint()
-                value = (self._func, self._bound_instance) == (
-                    other._func,
-                    other._bound_instance,
-                )
-                print(self._func == other._func)
-                print(self._bound_instance == other._bound_instance)
-                print(self._bound_instance._spoor_name)
-                print(other._bound_instance._spoor_name)
-                return value
-
-            # def __ne__(self, other):
-            #     return not self.__eq__(other)
-
         return Wrapper
 
     def _decorate_function(self, func: Callable, is_method: bool = False) -> Callable:
         WrapperClass = self._get_func_wrapper_cls(is_method=is_method)
-        inner = wraps(func)(WrapperClass(func))
+        inner = WrapperClass(func)
         # NOTE: add function to the registry
         # self.storage.set_name
         if self.attach:

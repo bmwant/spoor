@@ -144,3 +144,34 @@ def test_equality():
 
     assert s.called(t1.target_called)
     assert not s.called(t2.target_called)
+
+
+def test_bound_methods():
+    s = Spoor(distinct_instances=True)
+
+    @s.track
+    class TargetClass:
+        def target_called(self):
+            pass
+
+    t1 = TargetClass()
+    t2 = TargetClass()
+
+    wrapper1 = t1.target_called
+    wrapper2 = t2.target_called
+
+    assert isinstance(wrapper1, CallableWrapper)
+    assert isinstance(wrapper2, CallableWrapper)
+
+    assert wrapper1 is not wrapper2
+    assert id(wrapper1) != id(wrapper2)
+    assert hash(wrapper1) != hash(wrapper2)
+
+    assert hasattr(wrapper1, "_bound_instance")
+    assert hasattr(wrapper2, "_bound_instance")
+    bound1 = wrapper1._bound_instance
+    bound2 = wrapper2._bound_instance
+
+    assert bound1 is not bound2
+    assert hash(wrapper1) == hash(bound1)
+    assert hash(wrapper2) == hash(bound2)

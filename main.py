@@ -206,6 +206,61 @@ def not_allowed():
     setattr(prop.__class__, "prop", "value")
 
 
+def custom_method():
+    class method(object):
+        def __init__(self, func, instance, cls):
+            self.im_func = func
+            self.im_self = instance
+            self.im_class = cls
+
+        def __call__(self, *args, **kw):
+            if self.im_self:
+                args = (self.im_self,) + args
+            return self.im_func(*args, **kw)
+
+    class Wrapper:
+        def __init__(self, func):
+            self._func = func
+
+        def __call__(self, *args, **kwargs):
+            return self._func(*args, **kwargs)
+
+        def __get__(self, instance, cls):
+            a1 = method(self, instance, cls)
+            print("ID", id(a1))
+            return a1
+
+    @Wrapper
+    def my_func(a):
+        print("I am called with", a)
+
+    my_func(5)
+
+    class Target:
+        @Wrapper
+        def meth(self, b):
+            print("Method with", b)
+
+        def metho(self, c):
+            pass
+
+    t1 = Target()
+
+    t1.meth(6)
+    t1.meth(7)
+    u1 = t1.meth
+    u2 = t1.meth
+    print(u1, u2, id(u1), id(u2))
+
+    u3 = t1.metho
+    u4 = t1.metho
+
+    print(u3 == u4)
+    print(id(u3) == id(u4))
+    print(type(t1.meth))
+
+
 if __name__ == "__main__":
-    not_allowed()
+    # not_allowed()
     # bound_method()
+    custom_method()

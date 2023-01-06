@@ -1,6 +1,7 @@
 from typing import Callable
 
 from spoor import Spoor
+from spoor.tracker import CallableWrapper
 
 
 def test_decorate_function_attached():
@@ -88,3 +89,53 @@ def test_decoration_class_differs():
 
     assert isinstance(class_first, type)
     assert isinstance(class_second, type)
+
+    assert issubclass(class_first, CallableWrapper)
+    assert issubclass(class_second, CallableWrapper)
+
+
+def test_different_name_distinct_instances():
+    s = Spoor(distinct_instances=True)
+
+    @s.track
+    class TargetClass:
+        def target_called(self):
+            pass
+
+    t1 = TargetClass()
+    t2 = TargetClass()
+
+    t1.target_called()
+    t2.target_called()
+
+    key1 = hash(t1.target_called)
+    key2 = hash(t2.target_called)
+
+    assert key1 != key2
+    assert t1.target_called.name == "t1.target_called"
+    assert t2.target_called.name == "t2.target_called"
+
+
+def test_same_name_for_groupped_instances():
+    s = Spoor(distinct_instances=False)
+
+    @s.track
+    class TargetClass:
+        def target_called(self):
+            pass
+
+    t1 = TargetClass()
+    t2 = TargetClass()
+
+    t1.target_called()
+    t2.target_called()
+
+    key1 = hash(t1.target_called)
+    key2 = hash(t2.target_called)
+
+    name1 = t1.target_called.name
+    name2 = t1.target_called.name
+
+    assert key1 == key2
+    assert name1 == "TargetClass.target_called"
+    assert name2 == "TargetClass.target_called"
