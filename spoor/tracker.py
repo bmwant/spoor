@@ -75,17 +75,19 @@ class Spoor:
             e.send(key=key)
 
     def __getitem__(self, func_id: CallableWrapper) -> FuncCall:
+        if not self._is_tracked(func_id=func_id):
+            obj_name = getattr(func_id, "__name__", str(func_id))
+            raise KeyError(f"{obj_name} is not tracked")
+
         key = hash(func_id)
-        try:
-            call_count = self.storage.get_value(key)
-            func_call = FuncCall(
-                name=self.storage.get_name(key),
-                called=bool(call_count),
-                call_count=call_count,
-            )
-            return func_call
-        except KeyError:
-            raise KeyError(f"{func_id.__name__} is not tracked")
+        call_count = self.storage.get_value(key)
+        func_call = FuncCall(
+            # name=self.storage.get_name(key),
+            name=func_id.name,
+            called=bool(call_count),
+            call_count=call_count,
+        )
+        return func_call
 
     def __del__(self):
         """
@@ -130,13 +132,14 @@ class Spoor:
                         # key = spoor._get_hash(method)
                         target = method
                     else:
-                        # alias = instance.__name__
-                        # key = spoor._get_hash(instance)
                         target = instance
                     logger.debug(f"Tracking {target}")
                     # TODO: set name on initial register step
-                    # spoor.storage.set_name(key, alias)
-                    spoor.storage.inc(hash(target))
+
+                    key = hash(target)
+                    # breakpoint()
+                    spoor.storage.set_name(key, str(target))
+                    spoor.storage.inc(key)
                     spoor._export(target)
 
                 if is_method:
@@ -167,12 +170,13 @@ class Spoor:
                 """
                 if is_method:
                     # NOTE: return bound method
+                    logger.debug(f"Bound to {instance}")
                     return Wrapper(self._func, instance=instance)
                 return self
 
             def __hash__(self):
                 # TODO: test distinct enabled for function only
-                if spoor.distinct_instances:
+                if is_method and spoor.distinct_instances:
                     assert self._bound_instance is not None
                     return hash(self._bound_instance)
                 return hash(self._func)

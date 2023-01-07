@@ -28,7 +28,6 @@ class Storage(ABC):
 
 class MemoryStorage(Storage):
     def __init__(self, strict: bool = False):
-        # TODO: add lock for thread safety
         self._lock = RLock()
         self._registry = Counter()
         self._names = {}
@@ -37,8 +36,7 @@ class MemoryStorage(Storage):
     def get_value(self, key):
         if self.strict and key not in self._registry:
             raise KeyError(f"{key} not found")
-        with self._lock:
-            return self._registry[key]
+        return self._registry[key]
 
     def inc(self, key):
         with self._lock:
@@ -53,7 +51,6 @@ class MemoryStorage(Storage):
         self._names[key] = name
 
     def most_common(self, top_n: int = 3):
-        # TODO: rewrite using name property
         result = []
         for key, value in self._registry.most_common(n=top_n):
             name = self.get_name(key)

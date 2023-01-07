@@ -1,266 +1,79 @@
-# import functools
-# from threading import RLock
+# class MyClass:
+#     def my_method(self):
+#         print(f"Called bounded to {self}")
 
-# def control(func):
-#     control.lock = RLock()
-#     print("control.x is", control.x)
-#     @functools.wraps(func)
-#     def inner(*args, **kwargs):
-#         with control.lock:
-#             control.x += 1
-#         return func(*args, **kwargs)
 
-#     return inner
+# m_unbound = MyClass.my_method
+# print(f"{type(m_unbound)} {hash(m_unbound)}")  # <class 'function'> 8783579798336
+# m_unbound(None)
 
-# control.x = 0
+# mc = MyClass()
+# m1 = mc.my_method
+# print(f"{type(m1)} {hash(m1)}")  # <class 'method'> 122173
+# m1()
 
+# m2 = mc.my_method
+# print(f"{type(m2)} {hash(m2)}")  # <class 'method'> 122173
+# m2()
 
-# @control
-# def launch():
-#     print("You can launch me in a thread, x is safe")
+# print(m1 == m2)  # True
+# print(m1 is m2)  # False
+# print(id(m1) == id(m2))  # False
 
-# print(control.x)
 
+# print(m1.__self__ is m2.__self__)  # True
+# print(m1.__func__ is m2.__func__)  # True
+# print(m2.__func__ is m_unbound)  # True
 
-def wrap_with_inner(self):
-    class Inner:
-        def __init__(inner, func):
-            inner.func = func
 
-        def __call__(inner, *args, **kwargs):
-            if self.enabled:
-                key = self._get_hash(inner)
-                alias = inner.__name__
-                # logger.debug(f"Tracking {alias}[{key}]")
-                self.storage.set_name(key, inner.__name__)
-                self.storage.inc(key)
-                self._export(alias)
-            return inner.func(*args, **kwargs)
+# class FunctionLike:
+#     def __init__(self, func, instance=None):
+#         self.im_func = func
+#         self.im_self = instance
 
-    setattr(Inner, "called", property(partial(self.called)))
+#     def __call__(self, *args, **kwargs):
+#         if self.im_self is not None:
+#             # inject `self` as a first argument
+#             args = (self.im_self, ) + args
 
+#         return self.im_func(*args, **kwargs)
 
-def check_varname():
-    from varname import varname
 
-    class TargetClass:
-        def __init__(self, name):
-            self.name = name
+#     def __get__(self, instance, cls):
+#         if instance is not None:
+#             # bind method to instance
+#             # NOTE: also creating new object each time
+#             return FunctionLike(func=self.im_func, instance=instance)
 
-        # def __new__(cls, *args, **kwargs):
-        #     instance = super().__new__(cls)
-        #     instance._name = "spoor name"
-        #     return instance
+#         return self
 
-    def new(cls, *args, **kwargs):
-        instance = object.__new__(cls)
-        instance._name = varname()
-        return instance
+#     def __eq__(self, other):
+#         return (self.im_func, self.im_self) == (other.im_func, other.im_self)
 
-    setattr(TargetClass, "__new__", new)
 
-    tc = TargetClass("name")
-    print(tc.name)
-    print(tc._name)
+# def target(self=None):
+#     print(f"Bound to {self}")
 
-    tc2 = TargetClass("another one")
-    print(tc2.name)
-    print(tc2._name)
+# unbound = FunctionLike(target)
+# unbound()
 
-    from spoor import DatadogExporter, Spoor
+# class MyClass: pass
 
-    s = Spoor(
-        exporters=[DatadogExporter()],
-    )
+# MyClass.my_method = unbound
 
-    del s
+# mc = MyClass()
 
+# m1 = mc.my_method
+# m1()
 
-def descriptor():
-    from functools import partial, wraps
+# m2 = mc.my_method
+# m2()
 
-    class TargetClass:
-        def one(self):
-            print("one")
+# print(m1 == m2)  # True
+# print(m1 is m2)  # False
+# print(id(m1) == id(m2))  # False
 
-        @property
-        def two(self):
-            print("two")
 
-    def three(self):
-        print("three")
-
-    class DS:
-        def __get__(self, obj, objtype=None):
-            return "three"
-
-    tc = TargetClass()
-    _three = partial(three, tc)
-    tc.three = DS()
-    # v = property(tc.three)
-    tc.one()
-    tc.two
-    print("type two is", type(getattr(tc, "two")))
-    # print("v is", v, type(v))
-    # breakpoint()
-    tc.three
-
-    def gta(obj, name):
-        print("I am called")
-        return obj.__getattribute__(name)
-
-    def original():
-        print("I am untoched")
-
-    print(original.__getattribute__)
-
-    def fun():
-        print("This is not fun")
-
-    fun.__getattribute__ = gta
-    fun.prop = DS()
-    setattr(fun, "prop", DS)
-    # breakpoint()
-    print(fun.prop)
-
-    class Inner:
-        def __init__(self, func):
-            self.func = func
-
-        def __call__(self, *args, **kwargs):
-            return self.func(*args, **kwargs)
-
-        @property
-        def prop(self):
-            return "three"
-
-    def decor(func):
-        i = wraps(func)(Inner(func))
-        print(i.__wrapped__)
-        return i
-
-    def prop():
-        print("I am a property")
-
-    def my_func():
-        print("Just a function call")
-
-    my_func.prop = prop
-    my_func.prop  # prints 'I am a property'
-
-    my_func.__dict__["prop"] = property(lambda: "the prop")
-    print(my_func.prop)
-
-
-def bound_method():
-    def method(*args, **kwargs):
-        print("CAlling me %r %r" % (args, kwargs))
-
-    class CallableWrapper(object):
-        # the bound method remembers the instance and the function
-        def __init__(self, instance, function):
-            self.instance = instance
-            self.function = function
-
-        # when the bound method is called, it passes the instance
-        def __call__(self, *args, **kwargs):
-            return self.function(self.instance, *args, **kwargs)
-
-        # def __get__(self, instance, cls):
-        #     return CallableWrapper(instance, self.function)
-
-    class Method(object):
-        # the __get__ method assembles a bound method consisting of the
-        # instance it was called from and the function
-        def __get__(self, instance, cls):
-            return CallableWrapper(instance, method)
-
-    class Test(object):
-        pass
-
-    t = Test()
-    Test.method1 = Method()
-    t.method1()  # (<__main__.Test object at 0x7f94d8c3aad0>,) {}
-
-
-def not_allowed():
-    import typing
-
-    class MyFunc:
-        def __init__(self, func: typing.Callable):
-            self.f = func
-
-        def __call__(self, *args, **kwargs):
-            return self.f(*args, **kwargs)
-
-    def prop(self):
-        print(f"I am a property of {self}")
-
-    @MyFunc
-    def my_func():
-        print("Just a function call")
-
-    setattr(my_func.__class__, "prop", property(prop))
-    my_func.prop
-
-    setattr(prop.__class__, "prop", "value")
-
-
-def custom_method():
-    class method(object):
-        def __init__(self, func, instance, cls):
-            self.im_func = func
-            self.im_self = instance
-            self.im_class = cls
-
-        def __call__(self, *args, **kw):
-            if self.im_self:
-                args = (self.im_self,) + args
-            return self.im_func(*args, **kw)
-
-    class Wrapper:
-        def __init__(self, func):
-            self._func = func
-
-        def __call__(self, *args, **kwargs):
-            return self._func(*args, **kwargs)
-
-        def __get__(self, instance, cls):
-            a1 = method(self, instance, cls)
-            print("ID", id(a1))
-            return a1
-
-    @Wrapper
-    def my_func(a):
-        print("I am called with", a)
-
-    my_func(5)
-
-    class Target:
-        @Wrapper
-        def meth(self, b):
-            print("Method with", b)
-
-        def metho(self, c):
-            pass
-
-    t1 = Target()
-
-    t1.meth(6)
-    t1.meth(7)
-    u1 = t1.meth
-    u2 = t1.meth
-    print(u1, u2, id(u1), id(u2))
-
-    u3 = t1.metho
-    u4 = t1.metho
-
-    print(u3 == u4)
-    print(id(u3) == id(u4))
-    print(type(t1.meth))
-
-
-if __name__ == "__main__":
-    # not_allowed()
-    # bound_method()
-    custom_method()
+# print(m1.im_self is m2.im_self)  # True
+# print(m1.im_func is m2.im_func)  # True
+# print(m2.im_func is target)  # True
