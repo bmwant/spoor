@@ -17,7 +17,7 @@ def test_hash_function(distinct_instances):
     assert decorated._func is target
 
 
-@pytest.mark.parametrize("distinct_instances", [False])
+@pytest.mark.parametrize("distinct_instances", [True])
 def test_hash_unbound_method(distinct_instances):
     s = Spoor(distinct_instances=distinct_instances)
 
