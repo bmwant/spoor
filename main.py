@@ -77,3 +77,11 @@
 # print(m1.im_self is m2.im_self)  # True
 # print(m1.im_func is m2.im_func)  # True
 # print(m2.im_func is target)  # True
+
+
+class TC:
+    def method(self):
+        return 42
+
+
+assert TC.method() == 42

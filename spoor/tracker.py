@@ -117,46 +117,46 @@ class Spoor:
                 self._bound_instance = instance
                 update_wrapper(self, func)
 
-            def __call__(instance, *args, **kwargs):
-                self_ = instance._bound_instance
+            def __call__(self, *args, **kwargs):
+                instance = self._bound_instance
                 if spoor.enabled:
+                    target = self
                     if is_method:
-                        method_name = instance.__name__
-                        # class_name = self_.__class__.__name__
-                        # alias = f"{class_name}.{method_name}"
-                        method = getattr(self_.__class__, method_name)
-                        if spoor.distinct_instances:
-                            method = getattr(self_, method_name)
+                        #  is set by `wraps` decorator
+                        method_name = self.__name__
+                        target = self._func
+                        if spoor.distinct_instances and instance is not None:
+                            target = getattr(instance, method_name)
                             # instance_name = self_._spoor_name
                             # alias = f"{instance_name}.{method_name}"
-                        # key = spoor._get_hash(method)
-                        target = method
-                    else:
-                        target = instance
+
                     logger.debug(f"Tracking {target}")
                     # TODO: set name on initial register step
-
                     key = hash(target)
-                    # breakpoint()
                     spoor.storage.set_name(key, str(target))
                     spoor.storage.inc(key)
                     spoor._export(target)
 
-                if is_method:
-                    return instance._func(self_, *args, **kwargs)
-                return instance._func(*args, **kwargs)
+                if is_method and instance is not None:
+                    return self._func(instance, *args, **kwargs)
+                return self._func(*args, **kwargs)
 
             @property
             def name(self) -> str:
-                self_ = self._bound_instance
+                instance = self._bound_instance
                 # is set by `wraps` decorator
                 func_name = self.__name__
                 if is_method:
-                    class_name = self_.__class__.__name__
+                    # !!!
+                    class_name = instance.__class__.__name__
                     alias = f"{class_name}.{func_name}"
-                    if spoor.distinct_instances:
-                        instance_name = self_._spoor_name
+                    # NOTE: bound instance is not None, use variable name
+                    if spoor.distinct_instances and instance is not None:
+                        instance_name = instance._spoor_name
                         alias = f"{instance_name}.{func_name}"
+                    else:
+                        # breakpoint()
+                        pass
                     return alias
 
                 return func_name
@@ -172,6 +172,8 @@ class Spoor:
                     # NOTE: return bound method
                     logger.debug(f"Bound to {instance}")
                     return Wrapper(self._func, instance=instance)
+                print("Return for", cls)
+                breakpoint()
                 return self
 
             def __hash__(self):

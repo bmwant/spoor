@@ -1,3 +1,5 @@
+import pytest
+
 from spoor import Spoor
 from spoor.tracker import CallableWrapper
 
@@ -175,3 +177,19 @@ def test_bound_methods():
     assert bound1 is not bound2
     assert hash(wrapper1) == hash(bound1)
     assert hash(wrapper2) == hash(bound2)
+
+
+@pytest.mark.parametrize("distinct_instances", [True, False])
+def test_unbound_methods(distinct_instances):
+    s = Spoor(distinct_instances=distinct_instances)
+
+    @s.track
+    class TargetClass:
+        def target_called(self):
+            return 42
+
+    with pytest.raises(TypeError) as e:
+        TargetClass.target_called()
+
+    assert "missing 1 required positional argument: 'self'" in str(e)
+    assert TargetClass.target_called(None) == 42
