@@ -175,10 +175,9 @@ class Spoor:
                 return self
 
             def __hash__(self):
-                # TODO: test distinct enabled for function only
-                if is_method and spoor.distinct_instances:
-                    assert self._bound_instance is not None
+                if spoor.distinct_instances and self._bound_instance is not None:
                     return hash(self._bound_instance)
+
                 return hash(self._func)
 
         return Wrapper
