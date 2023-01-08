@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import Counter
+from threading import RLock
 from typing import List, Tuple
 
 
@@ -27,7 +28,7 @@ class Storage(ABC):
 
 class MemoryStorage(Storage):
     def __init__(self, strict: bool = False):
-        # TODO: add lock for thread safety
+        self._lock = RLock()
         self._registry = Counter()
         self._names = {}
         self.strict = strict
@@ -38,7 +39,8 @@ class MemoryStorage(Storage):
         return self._registry[key]
 
     def inc(self, key):
-        self._registry[key] += 1
+        with self._lock:
+            self._registry[key] += 1
 
     def get_name(self, key) -> str:
         if self.strict and key not in self._names:

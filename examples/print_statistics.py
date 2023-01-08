@@ -31,3 +31,6 @@ if __name__ == "__main__":
     # then
     print(s.topn())
     rich.print(s.topn())
+    rich.print(s[track_first])
+    rich.print(s[track_second])
+    rich.print(s[track_third])

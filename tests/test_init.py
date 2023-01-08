@@ -37,7 +37,7 @@ def test_reenable():
     assert s.call_count(target) == 6
 
 
-def test_get_hash_is_same_for_groupped_instances():
+def test_get_key_is_same_for_groupped_instances():
     s = Spoor(distinct_instances=False)
 
     @s.track
@@ -48,13 +48,13 @@ def test_get_hash_is_same_for_groupped_instances():
     t1 = TargetClass()
     t2 = TargetClass()
 
-    key1 = s._get_hash(t1.target_called)
-    key2 = s._get_hash(t2.target_called)
+    key1 = s._get_key(t1.target_called)
+    key2 = s._get_key(t2.target_called)
 
     assert key1 == key2
 
 
-def test_hash_is_different_if_ungropped():
+def test_key_is_different_if_ungropped():
     s = Spoor(distinct_instances=True)
 
     @s.track
@@ -65,13 +65,13 @@ def test_hash_is_different_if_ungropped():
     t1 = TargetClass()
     t2 = TargetClass()
 
-    key1 = s._get_hash(t1.target_called)
-    key2 = s._get_hash(t2.target_called)
+    key1 = s._get_key(t1.target_called)
+    key2 = s._get_key(t2.target_called)
 
     assert key1 != key2
 
 
-def test_get_hash_on_functions():
+def test_get_key_on_functions():
     s = Spoor()
 
     def target_first():
@@ -80,42 +80,42 @@ def test_get_hash_on_functions():
     def target_second():
         pass
 
-    key1 = s._get_hash(target_first)
-    key2 = s._get_hash(target_second)
+    key1 = s._get_key(target_first)
+    key2 = s._get_key(target_second)
 
     assert key1 != key2
 
 
-def test_hash_stays_same_for_decorated_function():
+def test_key_stays_same_for_decorated_function():
     s = Spoor()
 
     def target():
         pass
 
-    hash = s._get_hash(target)
+    hash = s._get_key(target)
     decorated = s.track(target)
 
-    new_hash = s._get_hash(decorated)
+    new_hash = s._get_key(decorated)
 
     assert hash == new_hash
 
 
-def test_hash_stays_same_for_decorated_class():
+def test_key_stays_same_for_decorated_class():
     s = Spoor()
 
     class TargetClass:
         def target(self):
             pass
 
-    hash = s._get_hash(TargetClass.target)
+    key = s._get_key(TargetClass.target)
     DecoratedClass = s.track(TargetClass)
 
-    new_hash = s._get_hash(DecoratedClass.target)
+    new_key = s._get_key(DecoratedClass.target)
 
-    assert hash == new_hash
+    assert key == new_key
 
 
-def test_hash_stays_same_for_decorated_instances():
+def test_key_stays_same_for_decorated_instances():
     s = Spoor(distinct_instances=False)
 
     class TargetClass:
@@ -123,13 +123,14 @@ def test_hash_stays_same_for_decorated_instances():
             pass
 
     t1 = TargetClass()
-    hash = s._get_hash(t1.target)
+    original = t1.target.__func__
+    key = s._get_key(original)
 
     DecoratedClass = s.track(TargetClass)
     t2 = DecoratedClass()
-    new_hash = s._get_hash(t2.target)
+    new_key = s._get_key(t2.target)
 
-    assert hash == new_hash
+    assert key == new_key
 
 
 def test_is_tracked():

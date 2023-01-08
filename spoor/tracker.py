@@ -3,8 +3,8 @@ import types
 import typing
 from abc import ABC
 from collections import deque
-from functools import wraps
-from typing import Callable, List, Optional, Union
+from functools import update_wrapper
+from typing import Callable, List, Optional
 
 from varname import varname
 
@@ -69,22 +69,24 @@ class Spoor:
             # TODO: add track by import path
             raise ValueError(f"Cannot track instance of {type(target)}")
 
-    def _export(self, key: str):
+    def _export(self, target: WrapperType):
         for e in self.exporters:
+            key = target.name
             e.send(key=key)
 
-    def __getitem__(self, func_id: Union[Callable, str]) -> FuncCall:
-        key = self._get_hash(func_id)
-        try:
-            call_count = self.storage.get_value(key)
-            func_call = FuncCall(
-                name=self.storage.get_name(key),
-                called=bool(call_count),
-                call_count=call_count,
-            )
-            return func_call
-        except KeyError:
-            raise KeyError(f"{func_id.__name__} is not tracked")
+    def __getitem__(self, func_id: CallableWrapper) -> FuncCall:
+        if not self._is_tracked(func_id=func_id):
+            obj_name = getattr(func_id, "__name__", str(func_id))
+            raise KeyError(f"{obj_name} is not tracked")
+
+        key = self._get_key(func_id)
+        call_count = self.storage.get_value(key)
+        func_call = FuncCall(
+            name=func_id.name,
+            called=bool(call_count),
+            call_count=call_count,
+        )
+        return func_call
 
     def __del__(self):
         """
@@ -109,53 +111,80 @@ class Spoor:
             wrapped objects and hide on others
             """
 
-            def __init__(instance, func: Callable):
-                instance._func = func
-                instance._bound_instance = None
-
-            def _bound(self, instance):
+            def __init__(self, func: Callable, instance=None):
+                self._func = func
                 self._bound_instance = instance
+                update_wrapper(self, func)
 
-            def __call__(instance, *args, **kwargs):
-                self_ = instance._bound_instance
+            # TODO: override `__new__` to register name on object creation
+
+            def __call__(self, *args, **kwargs):
+                instance = self._bound_instance
                 if spoor.enabled:
+                    target = self
                     if is_method:
-                        method_name = instance.__name__
-                        class_name = self_.__class__.__name__
-                        alias = f"{class_name}.{method_name}"
-                        method = getattr(self_.__class__, method_name)
-                        if spoor.distinct_instances:
-                            method = getattr(self_, method_name)
-                            instance_name = self_._spoor_name
-                            alias = f"{instance_name}.{method_name}"
-                        key = spoor._get_hash(method)
-                    else:
-                        alias = instance.__name__
-                        key = spoor._get_hash(instance)
-                    logger.debug(f"Tracking {alias}[{key}]")
-                    # TODO: set name on initial register step
-                    spoor.storage.set_name(key, alias)
-                    spoor.storage.inc(key)
-                    spoor._export(alias)
+                        #  is set by `wraps` decorator
+                        method_name = self.__name__
+                        target = self._func
+                        if spoor.distinct_instances and instance is not None:
+                            target = getattr(instance, method_name)
 
+                    logger.debug(f"Tracking {target}")
+                    # TODO: set name on initial register step
+                    key = spoor._get_key(target)
+                    spoor.storage.set_name(key, self.name)
+                    spoor.storage.inc(key)
+                    spoor._export(target)
+
+                if is_method and instance is not None:
+                    return self._func(instance, *args, **kwargs)
+                return self._func(*args, **kwargs)
+
+            @property
+            def name(self) -> str:
+                instance = self._bound_instance
+                # is set by `wraps` decorator
+                func_name = self.__name__
                 if is_method:
-                    return instance._func(self_, *args, **kwargs)
-                return instance._func(*args, **kwargs)
+                    # NOTE: below would not work for unbound methods
+                    # class_name = instance.__class__.__name__
+                    class_name = self._func.__qualname__.split(".")[-2]
+                    alias = f"{class_name}.{func_name}"
+                    # NOTE: bound instance is not None, use variable name
+                    if spoor.distinct_instances and instance is not None:
+                        instance_name = instance._spoor_name
+                        alias = f"{instance_name}.{func_name}"
+                    return alias
+
+                return func_name
+
+            def __str__(self) -> str:
+                return f"(S) {self.name}[{self.__hash__()}]"
 
             def __get__(self, instance, cls):
-                self._bound(instance)
+                """
+                Handle method binding
+                """
+                if is_method:
+                    # NOTE: return bound method
+                    logger.debug(f"Bound to {instance}")
+                    return Wrapper(self._func, instance=instance)
+
+                # TODO: how to test this path
                 return self
 
             def __hash__(self):
-                if spoor.distinct_instances:
+                if spoor.distinct_instances and self._bound_instance is not None:
                     return hash(self._bound_instance)
+
                 return hash(self._func)
 
         return Wrapper
 
     def _decorate_function(self, func: Callable, is_method: bool = False) -> Callable:
         WrapperClass = self._get_func_wrapper_cls(is_method=is_method)
-        inner = wraps(func)(WrapperClass(func))
+        inner = WrapperClass(func)
+        # NOTE: add function to the registry
         if self.attach:
             setattr(inner.__class__, "called", property(self.called))
             setattr(inner.__class__, "call_count", property(self.call_count))
@@ -184,22 +213,17 @@ class Spoor:
 
         return klass
 
-    def _get_hash(self, func_id):
-        if not self.distinct_instances:
-            # NOTE: return same hash for different bound methods
-            if hasattr(func_id, "__self__"):
-                klass = func_id.__self__.__class__
-                method = getattr(klass, func_id.__name__)
-                return hash(method)
+    def _get_key(self, func_id: WrapperType):
+        # NOTE: try just func_id
         return hash(func_id)
 
     def called(self, func_id) -> bool:
         return self.call_count(func_id) != 0
 
     def call_count(self, func_id) -> int:
-        key = self._get_hash(func_id)
+        key = self._get_key(func_id)
         count = self.storage.get_value(key)
-        logger.debug(f"Calls count {func_id.__name__}[{key}] = {count}")
+        logger.debug(f"Calls count {func_id} = {count}")
         return count
 
     def topn(self, n: int = 5) -> TopCalls:

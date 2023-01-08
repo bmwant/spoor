@@ -113,8 +113,8 @@ def test_get_item():
     assert func_call.name == "target"
 
 
-@pytest.mark.skip(reason="strict is not implemented yet")
-def test_get_item_missing_strict():
+# @pytest.mark.skip(reason="strict is not implemented yet")
+def test_get_item_missing():
     s = Spoor()
 
     @s.track
@@ -126,25 +126,6 @@ def test_get_item_missing_strict():
 
     with pytest.raises(KeyError):
         s[missing]
-
-
-def test_get_item_missing_not_strict():
-    s = Spoor()
-
-    @s.track
-    def target():
-        pass
-
-    def missing():
-        pass
-
-    result = s[missing]
-
-    assert isinstance(result, FuncCall)
-    # NOTE: just default values
-    assert result.name == ""
-    assert result.called is False
-    assert result.call_count == 0
 
 
 def test_func_call_render_called(capsys):
