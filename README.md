@@ -47,8 +47,8 @@ assert s.call_count(func) == 2
 
 ### Exporters
 
-* [statsd]()
-* [DataDog]()
+* [statsd](#)
+* [DataDog](#)
 
 ### See also
 
