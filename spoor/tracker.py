@@ -79,7 +79,7 @@ class Spoor:
             obj_name = getattr(func_id, "__name__", str(func_id))
             raise KeyError(f"{obj_name} is not tracked")
 
-        key = hash(func_id)
+        key = self._get_key(func_id)
         call_count = self.storage.get_value(key)
         func_call = FuncCall(
             # name=self.storage.get_name(key),
@@ -132,7 +132,8 @@ class Spoor:
 
                     logger.debug(f"Tracking {target}")
                     # TODO: set name on initial register step
-                    key = hash(target)
+                    key = spoor._get_key(target)
+                    # TODO: name should be like `.name` attr
                     spoor.storage.set_name(key, str(target))
                     spoor.storage.inc(key)
                     spoor._export(target)
@@ -172,7 +173,6 @@ class Spoor:
                     return Wrapper(self._func, instance=instance)
 
                 # TODO: how to test this path
-                breakpoint()
                 return self
 
             def __hash__(self):
@@ -216,21 +216,16 @@ class Spoor:
 
         return klass
 
-    def _get_hash(self, func_id):
-        if not self.distinct_instances:
-            # NOTE: return same hash for different bound methods
-            if hasattr(func_id, "__self__"):
-                klass = func_id.__self__.__class__
-                method = getattr(klass, func_id.__name__)
-                return hash(method)
+    def _get_key(self, func_id: WrapperType):
+        # NOTE: try just func_id
         return hash(func_id)
 
     def called(self, func_id) -> bool:
         return self.call_count(func_id) != 0
 
     def call_count(self, func_id) -> int:
-        # key = self._get_hash(func_id)
-        count = self.storage.get_value(hash(func_id))
+        key = self._get_key(func_id)
+        count = self.storage.get_value(key)
         logger.debug(f"Calls count {func_id} = {count}")
         return count
 
