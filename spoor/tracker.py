@@ -170,7 +170,8 @@ class Spoor:
                     # NOTE: return bound method
                     logger.debug(f"Bound to {instance}")
                     return Wrapper(self._func, instance=instance)
-                print("Return for", cls)
+
+                # TODO: how to test this path
                 breakpoint()
                 return self
 
