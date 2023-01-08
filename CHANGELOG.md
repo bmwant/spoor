@@ -1,5 +1,19 @@
 <!--next-version-placeholder-->
 
+## v0.6.0 (2023-01-08)
+### Feature
+* Wrapper objects expose name attribute on themselves :poultry_leg: ([`b289ea8`](https://github.com/bmwant/spoor/commit/b289ea8307ff6e7dee620951067d25f33be87097))
+* Add hashing to callable wrapper :microscope: ([`3e4a1b8`](https://github.com/bmwant/spoor/commit/3e4a1b84307a2e6d8d9171269baf7f278ab40229))
+
+### Fix
+* Use name from the name property :arrow_double_up: ([`9a7f6a0`](https://github.com/bmwant/spoor/commit/9a7f6a060692107223ff7243e9cae7777f18598f))
+* Use qualname to obtain name of the class for unbound method :microscope: ([`f5745de`](https://github.com/bmwant/spoor/commit/f5745deff7cb612f2f715798a5bf0ed9aea3beed))
+* Use qualname to obtain name of the class for unbound method :libra: ([`3276f60`](https://github.com/bmwant/spoor/commit/3276f608796d4295fa341281fbef1e5b4c6fb4b0))
+* Proper invocation for unbound methods :left_right_arrow: ([`db6800e`](https://github.com/bmwant/spoor/commit/db6800ee6adc5750bb4f1e3ebb9d2101447b8639))
+
+### Documentation
+* Update example in readme :mailbox: ([`7f8bb9e`](https://github.com/bmwant/spoor/commit/7f8bb9e8111f02e23d2e1f1dd9dd25041dda93b8))
+
 ## v0.5.0 (2023-01-03)
 ### Feature
 * Add helper method to check whether function is tracked :droplet: ([`759cb93`](https://github.com/bmwant/spoor/commit/759cb931bedafa327b372bf289d1a901a76910b0))
