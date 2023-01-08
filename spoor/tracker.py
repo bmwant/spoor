@@ -71,7 +71,7 @@ class Spoor:
 
     def _export(self, target: WrapperType):
         for e in self.exporters:
-            key = target.__name__
+            key = target.name
             e.send(key=key)
 
     def __getitem__(self, func_id: CallableWrapper) -> FuncCall:
@@ -147,16 +147,14 @@ class Spoor:
                 # is set by `wraps` decorator
                 func_name = self.__name__
                 if is_method:
-                    # !!!
-                    class_name = instance.__class__.__name__
+                    # NOTE: below would not work for unbound methods
+                    # class_name = instance.__class__.__name__
+                    class_name = self._func.__qualname__.split(".")[-2]
                     alias = f"{class_name}.{func_name}"
                     # NOTE: bound instance is not None, use variable name
                     if spoor.distinct_instances and instance is not None:
                         instance_name = instance._spoor_name
                         alias = f"{instance_name}.{func_name}"
-                    else:
-                        # breakpoint()
-                        pass
                     return alias
 
                 return func_name
