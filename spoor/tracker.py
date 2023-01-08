@@ -82,7 +82,6 @@ class Spoor:
         key = self._get_key(func_id)
         call_count = self.storage.get_value(key)
         func_call = FuncCall(
-            # name=self.storage.get_name(key),
             name=func_id.name,
             called=bool(call_count),
             call_count=call_count,
@@ -117,6 +116,8 @@ class Spoor:
                 self._bound_instance = instance
                 update_wrapper(self, func)
 
+            # TODO: override `__new__` to register name on object creation
+
             def __call__(self, *args, **kwargs):
                 instance = self._bound_instance
                 if spoor.enabled:
@@ -127,14 +128,11 @@ class Spoor:
                         target = self._func
                         if spoor.distinct_instances and instance is not None:
                             target = getattr(instance, method_name)
-                            # instance_name = self_._spoor_name
-                            # alias = f"{instance_name}.{method_name}"
 
                     logger.debug(f"Tracking {target}")
                     # TODO: set name on initial register step
                     key = spoor._get_key(target)
-                    # TODO: name should be like `.name` attr
-                    spoor.storage.set_name(key, str(target))
+                    spoor.storage.set_name(key, self.name)
                     spoor.storage.inc(key)
                     spoor._export(target)
 
@@ -187,7 +185,6 @@ class Spoor:
         WrapperClass = self._get_func_wrapper_cls(is_method=is_method)
         inner = WrapperClass(func)
         # NOTE: add function to the registry
-        # self.storage.set_name
         if self.attach:
             setattr(inner.__class__, "called", property(self.called))
             setattr(inner.__class__, "call_count", property(self.call_count))
