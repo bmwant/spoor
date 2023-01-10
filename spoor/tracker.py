@@ -8,7 +8,7 @@ from typing import Callable, List, Optional
 
 from varname import varname
 
-from spoor.exporter import Exporter
+from spoor.exporters import Exporter
 from spoor.statistics import FuncCall, TopCalls
 from spoor.storage import MemoryStorage, Storage
 from spoor.utils import logger

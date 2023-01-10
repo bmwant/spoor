@@ -1,40 +1,8 @@
-from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 import datadog
-import statsd
 
-
-class Exporter(ABC):
-    @abstractmethod
-    def send(self, key: str, **extras) -> None:
-        raise NotImplementedError("Provide implementation")
-
-    @abstractmethod
-    def flush(self) -> None:
-        raise NotImplementedError("Provide implementation")
-
-
-class StatsdExporter(Exporter):
-    def __init__(
-        self,
-        *,
-        metric: Optional[str] = None,
-        options,
-    ):
-        # TODO: use default options if not provided
-        self.metric = metric
-        self.statsd = statsd.StatsClient(
-            host=options["statsd_host"],
-            port=options["statsd_port"],
-            prefix=self.metric,
-        )
-
-    def send(self, key, **extras):
-        self.statsd.incr(key)
-
-    def flush(self):
-        self.statsd.close()
+from spoor.exporters.base import Exporter
 
 
 class DatadogExporter(Exporter):
