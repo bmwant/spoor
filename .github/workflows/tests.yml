@@ -35,12 +35,17 @@ jobs:
         run: |
           make install
 
-      # - name: Check codestyle / formatting
-      #   run: |
-      #     echo "Checking imports order"
-      #     poetry run isort . --check-only
-      #     echo "Checking black codestyle"
-      #     poetry run black . --check
+      - name: Lint code
+        run: |
+          echo "Linting code"
+          poetry run flake8 . --count
+
+      - name: Check codestyle / formatting
+        run: |
+          echo "Checking imports order"
+          poetry run isort . --check-only
+          echo "Checking black codestyle"
+          poetry run black . --check
 
       - name: Run unittests
         run: |

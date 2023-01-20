@@ -40,10 +40,10 @@ def test_not_called():
 def test_lambda():
     s = Spoor()
 
-    l = lambda: ...
-    l = s.track(l)
+    target = lambda: ...  # noqa: E731
+    target = s.track(target)
 
-    l()
+    target()
 
-    assert s.called(l)
-    assert s.call_count(l) == 1
+    assert s.called(target)
+    assert s.call_count(target) == 1
