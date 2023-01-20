@@ -16,9 +16,11 @@ rich = "^12.6.0"
 pytest = "^7.2.0"
 isort = "^5.11.4"
 black = "^22.12.0"
-mkdocs = "^1.4.2"
 python-semantic-release = "^7.32.2"
-
+flake8 = [
+  { version = "^6.0.0", python = ">=3.8.1" },
+  { version = "^4.0.0", python = "<3.8.1" }
+]
 
 [tool.poetry.group.exporters.dependencies]
 statsd = "^4.0.1"
