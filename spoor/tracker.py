@@ -6,7 +6,7 @@ from collections import deque
 from functools import update_wrapper
 from typing import Callable, List, Optional
 
-from varname import ImproperUseError, varname
+from varname import ImproperUseError, varname  # noqa: F401
 
 from spoor.exporters import Exporter
 from spoor.statistics import FuncCall, TopCalls
@@ -23,6 +23,9 @@ WrapperType = typing.TypeVar("WrapperType", bound=CallableWrapper)
 
 
 class Spoor:
+    # TODO: allow to specify excludes
+    EXCLUDE = ("__new__",)
+
     def __init__(
         self,
         storage: Optional[Storage] = None,
@@ -57,12 +60,13 @@ class Spoor:
 
                 def _spoor_new(cls, *args, **kwargs):
                     instance = object.__new__(cls)
-                    try:
-                        instance._spoor_name = varname()
-                    except ImproperUseError:
-                        # TODO: this should be probably handled in a different way
-                        # NOTE: when tracking dunder methods to deal with `__new__`
-                        instance._spoor_name = hex(id(instance))
+                    instance._spoor_name = varname()
+
+                    # TODO: add handling of static/classmethods
+                    # try:
+                    #     instance._spoor_name = varname()
+                    # except ImproperUseError:
+                    #     instance._spoor_name = hex(id(instance))
                     return instance
 
                 setattr(target, "__new__", _spoor_new)
@@ -207,7 +211,9 @@ class Spoor:
         """
         for key in klass.__dict__:
             method = klass.__dict__[key]
-            skip_method = self.skip_dunder and self._is_dunder(key)
+            skip_method = (
+                self.skip_dunder and self._is_dunder(key) or key in self.EXCLUDE
+            )
             if isinstance(method, types.FunctionType) and not skip_method:
                 logger.debug(f"Wrapping method {method}")
                 decorated = self._decorate_function(method, is_method=True)
