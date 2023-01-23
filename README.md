@@ -50,6 +50,11 @@ assert s.call_count(func) == 2
 * [statsd](#)
 * [DataDog](#)
 
+### Limitations
+
+* No support for `staticmethod` tracking yet
+* No support for `classmethod` tracking yet
+
 ### See also
 
 * 🍒 [podmena](https://github.com/bmwant/podmena) for nice commits emoji

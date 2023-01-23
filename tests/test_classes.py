@@ -106,10 +106,6 @@ def test_dunder_with_distinct_instances():
     assert not s.called(t2.__bool__)
 
 
-def test_new_with_distinct_instances():
-    pass
-
-
 def test_distinct_instances():
     s = Spoor(distinct_instances=True)
 

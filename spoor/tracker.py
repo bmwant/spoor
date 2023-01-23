@@ -53,22 +53,19 @@ class Spoor:
         if isinstance(target, types.FunctionType):
             return self._decorate_function(target)
         elif isinstance(target, type):
-            # if self.attach:
-            #     raise NotImplementedError("Attach for methods does not work yet")
-
             if self.distinct_instances:
 
-                def new(cls, *args, **kwargs):
+                def _spoor_new(cls, *args, **kwargs):
                     instance = object.__new__(cls)
-                    # breakpoint()
                     try:
                         instance._spoor_name = varname()
                     except ImproperUseError:
+                        # TODO: this should be probably handled in a different way
                         # NOTE: when tracking dunder methods to deal with `__new__`
                         instance._spoor_name = hex(id(instance))
                     return instance
 
-                setattr(target, "__new__", new)
+                setattr(target, "__new__", _spoor_new)
             return self._decorate_methods(target)
         else:
             # TODO: add track by import path
