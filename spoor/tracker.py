@@ -6,7 +6,7 @@ from collections import deque
 from functools import update_wrapper
 from typing import Callable, List, Optional
 
-from varname import varname
+from varname import ImproperUseError, varname
 
 from spoor.exporters import Exporter
 from spoor.statistics import FuncCall, TopCalls
@@ -53,14 +53,19 @@ class Spoor:
         if isinstance(target, types.FunctionType):
             return self._decorate_function(target)
         elif isinstance(target, type):
-            if self.attach:
-                raise NotImplementedError("Attach for methods does not work yet")
+            # if self.attach:
+            #     raise NotImplementedError("Attach for methods does not work yet")
 
             if self.distinct_instances:
 
                 def new(cls, *args, **kwargs):
                     instance = object.__new__(cls)
-                    instance._spoor_name = varname()
+                    # breakpoint()
+                    try:
+                        instance._spoor_name = varname()
+                    except ImproperUseError:
+                        # NOTE: when tracking dunder methods to deal with `__new__`
+                        instance._spoor_name = hex(id(instance))
                     return instance
 
                 setattr(target, "__new__", new)

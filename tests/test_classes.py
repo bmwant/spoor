@@ -60,6 +60,56 @@ def test_dunder_is_not_tracked():
     assert not s.called(tc.__str__)
 
 
+def test_dunder_is_tracked():
+    s = Spoor(skip_dunder=False)
+
+    @s.track
+    class TargetClass:
+        def __init__(self):
+            pass
+
+        def __eq__(self, other):
+            return False
+
+        def __bool__(self):
+            return True
+
+    t1 = TargetClass()
+    t2 = TargetClass()
+
+    result = t1 == t2
+    assert result is False
+    assert s.called(t1.__eq__)
+
+    assert bool(t1) is True
+    # NOTE: instances are groupped so method is considered the same
+    assert s.called(t1.__bool__)
+    assert s.called(t2.__bool__)
+
+    assert s.called(t1.__init__)
+    assert s.called(t2.__init__)
+
+
+def test_dunder_with_distinct_instances():
+    s = Spoor(skip_dunder=False, distinct_instances=True)
+
+    @s.track
+    class TargetClass:
+        def __bool__(self):
+            return False
+
+    t1 = TargetClass()
+    t2 = TargetClass()
+
+    assert bool(t1) is False
+    assert s.called(t1.__bool__)
+    assert not s.called(t2.__bool__)
+
+
+def test_new_with_distinct_instances():
+    pass
+
+
 def test_distinct_instances():
     s = Spoor(distinct_instances=True)
 
