@@ -54,6 +54,7 @@ class Spoor:
 
     def track(self, target):
         if isinstance(target, types.FunctionType):
+            # TODO: implement wrapping a single method
             return self._decorate_function(target)
         elif isinstance(target, type):
             if self.distinct_instances:
@@ -154,7 +155,7 @@ class Spoor:
                 if is_method:
                     # NOTE: below would not work for unbound methods
                     # class_name = instance.__class__.__name__
-                    class_name = self._func.__qualname__.split(".")[-2]
+                    class_name = spoor._get_class_name(self._func)
                     alias = f"{class_name}.{func_name}"
                     # NOTE: bound instance is not None, use variable name
                     if spoor.distinct_instances and instance is not None:
@@ -186,6 +187,9 @@ class Spoor:
                 return hash(self._func)
 
         return Wrapper
+
+    def _get_class_name(self, func):
+        return func.__qualname__.split(".")[-2]
 
     def _decorate_function(self, func: Callable, is_method: bool = False) -> Callable:
         WrapperClass = self._get_func_wrapper_cls(is_method=is_method)
